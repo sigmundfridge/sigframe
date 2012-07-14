@@ -1,0 +1,78 @@
+<?php 
+	$defaults = array('empty_cat'=>0,'max_cat'=>8, 'home_img'=>1, 'other_img'=>0, 'feat_tag'=>-1, 'max_feat_h'=>150,'cat'=>array(1,1,0,0,0,0));
+	$options = get_option('nMod_theme_options',$defaults);
+
+	$list_empty_cat = $options['cat_order']['empty'];
+	$max_cat = $options['max_cat'];
+	$show_empty_cat=$options['empty_cat'];
+	$cat_no = count_categories($max_cat, $list_empty_cat, $show_empty_cat);		
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" <?php sandbox_blog_lang(); ?>>
+<head profile="http://gmpg.org/xfn/11">
+	<meta charset="<?php bloginfo( 'charset' ); ?>" />
+
+	<title><?php bloginfo('name'); if ( is_404() ) : _e(' &raquo; ', 'sandbox'); _e('Not Found', 'sandbox'); elseif ( is_home() ) : _e(' &raquo; ', 'sandbox'); bloginfo('description'); else : wp_title(); endif; ?></title>
+	<meta http-equiv="content-type" content="<?php bloginfo('html_type') ?>; charset=<?php bloginfo('charset') ?>" />
+	<meta name="description" content="<?php bloginfo('description') ?>" />
+	<link rel="stylesheet" type="text/css" href="<?php bloginfo('stylesheet_url'); ?>" />
+	<link rel="alternate" type="application/rss+xml" href="<?php bloginfo('rss2_url') ?>" title="<?php echo wp_specialchars(get_bloginfo('name'), 1) ?> <?php _e('Posts RSS feed', 'sandbox'); ?>" />
+	<link rel="alternate" type="application/rss+xml" href="<?php bloginfo('comments_rss2_url') ?>" title="<?php echo wp_specialchars(get_bloginfo('name'), 1) ?> <?php _e('Comments RSS feed', 'sandbox'); ?>" />
+	<link rel="pingback" href="<?php bloginfo('pingback_url') ?>" />
+	<?php if ( is_singular() && get_option( 'thread_comments' ) ) wp_enqueue_script( 'comment-reply' ); ?>
+	<link rel="icon" type="image/png" href="<?php echo $options['favicon']?>">
+
+<?php 
+	add_action('wp_print_scripts', 'do_script'); // For use on the Front end (ie. Theme)
+	add_action('wp_print_styles', 'do_style'); // For use on the Front end (ie. Theme)
+	$param = array('size'=>$cat_no, 'carousel'=>$options['carousel']);
+	do_action('wp_print_scripts', $param);	
+	wp_head();	
+	
+	
+	function do_script($param) {
+		wp_register_script("jcarousel-js", get_stylesheet_directory_uri()."/scripts/jquery.jcarousel.min.js",array("jquery"));
+		wp_register_script("carousel-start", get_stylesheet_directory_uri()."/scripts/carousel-main.js",array("jcarousel-js"));
+		wp_register_script("jquery-ui", "https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js", array	("jcarousel-js"));
+		wp_enqueue_script('jquery');
+		if($param['size']>6) {
+			wp_enqueue_script("jcarousel-js");
+			wp_enqueue_script("carousel-start");
+			wp_enqueue_script("jquery-ui");
+
+			$params = array('carousel_size' => $param['size'],'carousel_easing'=>$param['carousel']['easing'],'carousel_step' => $param['carousel']['step'], 'carousel_wrap'=>__($param['carousel']['wrap']),'carousel_speed'=>$param['carousel']['speed'],'carousel_auto'=>$param['carousel']['autoscroll'],'carousel_trigger'=>$param['carousel']['trigger']);
+			wp_localize_script( 'carousel-start', 'carouselParam', $params);
+		}
+	}
+
+	function do_style() {
+		wp_enqueue_style('jcarousel-css', get_stylesheet_directory_uri()."/css/jcarousel-simple/skin.css");
+	}
+
+
+	echo stripslashes($options['head_tracker']); 
+?>
+
+</head>
+
+<body class="<?php sandbox_body_class() ?>">
+
+<div id="wrapper" class="hfeed">
+
+	<div id="header">
+		<ul id="pages">
+			<?php wp_list_pages('title_li=&sort_column=post_title&sort_order=desc&depth=1' ) ?>
+		</ul>
+		<?php if($options['logo']) :?>
+			<h1><a class="blog-title" href="<?php echo get_settings('home') ?>/" title="<?php bloginfo('name') ?>" rel="home"><img id='main_logo' alt = "<?php bloginfo('name') ?>" src="<?php echo $options['logo'] ?>"/></a><span> | <?php bloginfo('description') ?></span></h1>
+		<?php else : ?>
+			<h1><a class="blog-title" href="<?php echo get_settings('home') ?>/" title="<?php bloginfo('name') ?>" rel="home"><?php bloginfo('name') ?></a><span> | <?php bloginfo('description') ?></span></h1>
+		<?php endif; ?>
+		<div id="blog-description"></div>
+		<?php include (TEMPLATEPATH . '/searchform.php'); ?>
+	</div><!--  #header -->
+
+	<div id="access">
+		<div class="skip-link"><a href="#content" title="<?php _e('Skip navigation to the content', 'sandbox'); ?>"><?php _e('Skip to content', 'sandbox'); ?></a></div>
+	</div><!-- #access -->

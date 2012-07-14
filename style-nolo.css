@@ -1,0 +1,29 @@
+jQuery(document).ready(function($) {
+	var result = $('#sort_cat').sortable({
+		axis:'y',
+		containment:'document',
+	});
+	
+	window.formfield='';
+	jQuery('.upload_image_button').click(function() {
+		window.formfield = jQuery('.upload_field', jQuery(this).parent());
+		tb_show('', 'media-upload.php?type=image&amp;TB_iframe=true');
+		return false;
+	});
+
+	window.send_to_editor = function(html) {
+		imgurl = jQuery('img',html).attr('src');
+		window.formfield.val(imgurl);
+		tb_remove();
+	};
+
+	jQuery('.upload_field').change(function(){
+	//preview_img());
+	
+	function preview_img(){
+		url = jQuery(this).val()
+		img_hold = jQuery(this).parent().find('.img-preview').empty();
+		image = img_hold.append('<img src="" class = "preview"/>');
+		image.find('.preview').attr('src',url);
+	})
+});
