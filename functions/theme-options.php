@@ -11,9 +11,8 @@ $frame = new sigFramework (
 
 class sigFramework {
 
-	private $themeName = get_current_theme();
-	private $shortName = 'sWOM';
-
+	private $themeName;
+	private $shortName;
 	private $sections;
 	private $checkboxes;
 	private $settings;
@@ -24,7 +23,9 @@ class sigFramework {
 		$this->settings = array();
 		$this->sections = $sections;
 		$this->get_settings();
-			
+		$this->themeName = get_current_theme();
+		$this->shortName = 'sWOM';
+	
 		add_action( 'admin_menu', array( &$this, 'add_pages' ) );
 		add_action( 'admin_init', array( &$this, 'register_settings' ) );
 		
