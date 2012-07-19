@@ -1,42 +1,5 @@
 <?php
 
-function sigf_do_settings_sections($page) {
-	global $wp_settings_sections, $wp_settings_fields;
-
-	if ( !isset($wp_settings_sections) || !isset($wp_settings_sections[$page]) )
-		return;
-
-	foreach ( (array) $wp_settings_sections[$page] as $section ) {
-		if ( $section['title'] )
-			echo "<h3>{$section['title']}</h3>\n";
-		call_user_func($section['callback'], $section);
-		if ( !isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']]) )
-			continue;
-		echo '<table class="form-table">';
-		do_settings_fields($page, $section['id']);
-		echo '</table>';
-	}
-}
-
-function sigf_do_settings_fields($page, $section) {
-	global $wp_settings_fields;
-
-	if ( !isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section]) )
-		return;
-
-	foreach ( (array) $wp_settings_fields[$page][$section] as $field ) {
-		echo '<tr valign="top">';
-		if ( !empty($field['args']['label_for']) )
-			echo '<th scope="row"><label for="' . $field['args']['label_for'] . '">' . $field['title'] . '</label></th>';
-		else
-			echo '<th scope="row">' . $field['title'] . '</th>';
-		echo '<td>';
-		call_user_func($field['callback'], $field['args']);
-		echo '</td>';
-		echo '</tr>';
-	}
-}
-
 class sigFramework {
 
 	private $themeName;
@@ -110,21 +73,21 @@ class sigFramework {
 //	if ( ! isset( $_REQUEST['settings-updated'] ) ) $_REQUEST['settings-updated'] = false;
 		if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] == true )
 			$saved = "<div class='saved'><p><strong>Options saved</strong></p></div>";
-		settings_fields( 'sigf_options' );
-		$icon = get_screen_icon(); 
-			
+		else $saved = '';			
 echo 
 <<<EOT
 		<div class='wrap'>
 			$saved
 			<div class = 'options'>
-				<form method='post' action='theme-options.php'>
-					$icon
-					<h2>
-						$this->themeName Theme Options
-					</h2>			
-					<div id = "tab_wrap ui-tabs">
-						<ul class = "ui-tabs-nav">
+				<form method='post' action='options.php'>
+EOT;
+			settings_fields( 'sigf_options' );
+			echo get_screen_icon();				
+echo 
+<<<EOT
+			<h2>$this->themeName Theme Options</h2>			
+					<div id = "tab_wrap">
+						<ul>
 EOT;
 foreach($this->sections as $id => $title) {
 echo 						"<li><a href='#{$id}'>{$title}</a></li>";
@@ -133,7 +96,7 @@ echo
 <<<EOT
 						</ul>
 EOT;
-		do_settings_sections( $_GET['page'] );
+		$this->sigf_do_settings_sections( $_GET['page'] );
 	
 echo <<<EOT
 					</div>
@@ -197,12 +160,12 @@ EOT;
 			
 			case 'checkbox':
 				
-				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="mytheme_options[' . $id . ']" value="1" ' . checked( $options[$id], 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';
+				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="sigf_options[' . $id . ']" value="1" ' . checked( $options[$id], 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';
 				
 				break;
 			
 			case 'select':
-				echo '<select class="select' . $field_class . '" name="mytheme_options[' . $id . ']">';
+				echo '<select class="select' . $field_class . '" name="sigf_options[' . $id . ']">';
 				
 				foreach ( $choices as $value => $label )
 					echo '<option value="' . esc_attr( $value ) . '"' . selected( $options[$id], $value, false ) . '>' . $label . '</option>';
@@ -217,7 +180,7 @@ EOT;
 			case 'radio':
 				$i = 0;
 				foreach ( $choices as $value => $label ) {
-					echo '<input class="radio' . $field_class . '" type="radio" name="mytheme_options[' . $id . ']" id="' . $id . $i . '" value="' . esc_attr( $value ) . '" ' . checked( $options[$id], $value, false ) . '> <label for="' . $id . $i . '">' . $label . '</label>';
+					echo '<input class="radio' . $field_class . '" type="radio" name="sigf_options[' . $id . ']" id="' . $id . $i . '" value="' . esc_attr( $value ) . '" ' . checked( $options[$id], $value, false ) . '> <label for="' . $id . $i . '">' . $label . '</label>';
 					if ( $i < count( $options ) - 1 )
 						echo '<br />';
 					$i++;
@@ -229,7 +192,7 @@ EOT;
 				break;
 			
 			case 'textarea':
-				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="mytheme_options[' . $id . ']" placeholder="' . $std . '" rows="5" cols="30">' . wp_htmledit_pre( $options[$id] ) . '</textarea>';
+				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="sigf_options[' . $id . ']" placeholder="' . $std . '" rows="5" cols="30">' . wp_htmledit_pre( $options[$id] ) . '</textarea>';
 				
 				if ( $desc != '' )
 					echo '<br /><span class="description">' . $desc . '</span>';
@@ -237,7 +200,7 @@ EOT;
 				break;
 			
 			case 'password':
-				echo '<input class="regular-text' . $field_class . '" type="password" id="' . $id . '" name="mytheme_options[' . $id . ']" value="' . esc_attr( $options[$id] ) . '" />';
+				echo '<input class="regular-text' . $field_class . '" type="password" id="' . $id . '" name="sigf_options[' . $id . ']" value="' . esc_attr( $options[$id] ) . '" />';
 				
 				if ( $desc != '' )
 					echo '<br /><span class="description">' . $desc . '</span>';
@@ -246,7 +209,7 @@ EOT;
 			
 			case 'text':
 			default:
-		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . $id . '" name="mytheme_options[' . $id . ']" placeholder="' . $std . '" value="' . esc_attr( $options[$id] ) . '" />';
+		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . $id . '" name="sigf_options[' . $id . ']" placeholder="' . $std . '" value="' . esc_attr( $options[$id] ) . '" />';
 		 		
 		 		if ( $desc != '' )
 		 			echo '<br /><span class="description">' . $desc . '</span>';
@@ -299,7 +262,7 @@ EOT;
 		);
 		
 		$this->settings['example_radio'] = array(
-			'section' => 'general',
+			'section' => 'carousel',
 			'title'   => __( 'Example Radio' ),
 			'desc'    => __( 'This is a description for the radio buttons.' ),
 			'type'    => 'radio',
@@ -464,6 +427,42 @@ EOT;
 		
 	}
 	
+	function sigf_do_settings_sections($page) {
+	global $wp_settings_sections, $wp_settings_fields;
+
+	if ( !isset($wp_settings_sections) || !isset($wp_settings_sections[$page]) )
+		return;
+	foreach ( (array) $wp_settings_sections[$page] as $section ) {
+		if ( !isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']]) )
+			continue;
+		echo '<div class="section" id = "'.$section['id'].'">';
+		if ( $section['title'] )
+			echo "<h3>{$section['title']}</h3>\n";
+		call_user_func($section['callback'], $section);
+		$this->sigf_do_settings_fields($page, $section['id']);
+		echo '</div>';
+		}
+	}
+
+function sigf_do_settings_fields($page, $section) {
+	global $wp_settings_fields;
+
+	if ( !isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section]) )
+		return;
+
+	foreach ( (array) $wp_settings_fields[$page][$section] as $field ) {
+		echo '<tr valign="top">';
+		if ( !empty($field['args']['label_for']) )
+			echo '<th scope="row"><label for="' . $field['args']['label_for'] . '">' . $field['title'] . '</label></th>';
+		else
+			echo '<th scope="row">' . $field['title'] . '</th>';
+		echo '<td>';
+		call_user_func($field['callback'], $field['args']);
+		echo '</td>';
+		echo '</tr>';
+	}
+}
+	
 }
 
 $frame = new sigFramework (
@@ -475,8 +474,8 @@ $frame = new sigFramework (
 	)
 );
 
-function mytheme_option( $option ) {
-	$options = get_option( 'mytheme_options' );
+function sigf_option( $option ) {
+	$options = get_option( 'sigf_options' );
 	if ( isset( $options[$option] ) )
 		return $options[$option];
 	else
