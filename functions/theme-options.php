@@ -1,13 +1,41 @@
 <?php
 
-$frame = new sigFramework (
-	array(
-		'general' => __('General Settings',$shortName),
-		'head_layout' => __('Headlines - Layout',$shortName),
-		'head_images' => __('Headlines - Images',$shortName),
-		'carousel' => __('Carousel',$shortName),
-	)
-);
+function sigf_do_settings_sections($page) {
+	global $wp_settings_sections, $wp_settings_fields;
+
+	if ( !isset($wp_settings_sections) || !isset($wp_settings_sections[$page]) )
+		return;
+
+	foreach ( (array) $wp_settings_sections[$page] as $section ) {
+		if ( $section['title'] )
+			echo "<h3>{$section['title']}</h3>\n";
+		call_user_func($section['callback'], $section);
+		if ( !isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']]) )
+			continue;
+		echo '<table class="form-table">';
+		do_settings_fields($page, $section['id']);
+		echo '</table>';
+	}
+}
+
+function sigf_do_settings_fields($page, $section) {
+	global $wp_settings_fields;
+
+	if ( !isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section]) )
+		return;
+
+	foreach ( (array) $wp_settings_fields[$page][$section] as $field ) {
+		echo '<tr valign="top">';
+		if ( !empty($field['args']['label_for']) )
+			echo '<th scope="row"><label for="' . $field['args']['label_for'] . '">' . $field['title'] . '</label></th>';
+		else
+			echo '<th scope="row">' . $field['title'] . '</th>';
+		echo '<td>';
+		call_user_func($field['callback'], $field['args']);
+		echo '</td>';
+		echo '</tr>';
+	}
+}
 
 class sigFramework {
 
@@ -81,17 +109,16 @@ class sigFramework {
 		
 //	if ( ! isset( $_REQUEST['settings-updated'] ) ) $_REQUEST['settings-updated'] = false;
 		if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] == true )
-			$saved = "<div class='saved'><p><strong>Options saved</strong></p></div>"
-		endif;
-		settings_fields( 'sigf_options' )
+			$saved = "<div class='saved'><p><strong>Options saved</strong></p></div>";
+		settings_fields( 'sigf_options' );
 		$icon = get_screen_icon(); 
 			
 echo 
-<<<'EOT'
+<<<EOT
 		<div class='wrap'>
 			$saved
 			<div class = 'options'>
-				<form method='post' action='options.php'>
+				<form method='post' action='theme-options.php'>
 					$icon
 					<h2>
 						$this->themeName Theme Options
@@ -103,15 +130,15 @@ foreach($this->sections as $id => $title) {
 echo 						"<li><a href='#{$id}'>{$title}</a></li>";
 }			
 echo 
-<<<'EOT'
+<<<EOT
 						</ul>
 EOT;
 		do_settings_sections( $_GET['page'] );
 	
-echo <<<'EOT'
+echo <<<EOT
 					</div>
 					<p class='submit'>
-						<input type='submit' class='button-primary' value='Save Options' />
+						<input name = 'submit' type='submit' class='button-primary' value='Save Options' />
 					</p>
 				</form>
 			</div>
@@ -439,7 +466,14 @@ EOT;
 	
 }
 
-$theme_options = new My_Theme_Options();
+$frame = new sigFramework (
+	array(
+		'general' => __('General Settings',$shortName),
+		'head_layout' => __('Headlines - Layout',$shortName),
+		'head_images' => __('Headlines - Images',$shortName),
+		'carousel' => __('Carousel',$shortName),
+	)
+);
 
 function mytheme_option( $option ) {
 	$options = get_option( 'mytheme_options' );
@@ -448,4 +482,6 @@ function mytheme_option( $option ) {
 	else
 		return false;
 }
+
+
 ?>
