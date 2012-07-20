@@ -451,15 +451,14 @@ function sigf_do_settings_fields($page, $section) {
 		return;
 
 	foreach ( (array) $wp_settings_fields[$page][$section] as $field ) {
-		echo '<tr valign="top">';
-		if ( !empty($field['args']['label_for']) )
-			echo '<th scope="row"><label for="' . $field['args']['label_for'] . '">' . $field['title'] . '</label></th>';
-		else
-			echo '<th scope="row">' . $field['title'] . '</th>';
-		echo '<td>';
+		echo '<div class = ""option">';
+		echo '<span class ="opt_label">' . $field['title'] . '</span>';
+		echo '<span class ="opt_input">';
 		call_user_func($field['callback'], $field['args']);
-		echo '</td>';
-		echo '</tr>';
+		if ( !empty($field['args']['label_for']) )
+			echo '<label for="' . $field['args']['label_for'] . '" class = "description">' . $field['title'] . '</label>';
+		echo '</span>';
+		echo '</div>';
 	}
 }
 	
