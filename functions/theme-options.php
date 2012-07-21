@@ -160,8 +160,7 @@ EOT;
 			
 			case 'checkbox':
 				
-				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="sigf_options[' . $id . ']" value="1" ' . checked( $options[$id], 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';
-				
+				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="sigf_options[' . $id . ']" value="1" ' . checked( $options[$id], 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';		
 				break;
 			
 			case 'select':
@@ -206,7 +205,27 @@ EOT;
 					echo '<br /><span class="description">' . $desc . '</span>';
 				
 				break;
-			
+				
+				case 'image':
+				$value = esc_attr( $options[$id] ) ;
+				if ( $desc != '' )
+					$desc_html = '<br /><span class="description">' . $desc . '</span>';
+		 		else $desc_html='';
+		 		if($options[$id])
+		 			$image  = '<img class = "exist-preview" id="logo-p" src="'.$options[$id].'" alt="'.$alt.'" />';
+				else $image = '';
+				
+		 		echo 
+<<<EOT
+					<input class="regular-text upload_field $field_class " type="text" id=" $id " name="sigf_options[' $id ']" placeholder=" $std " value=" $value " />
+					<input class="upload_image_button" type="button" value="Upload Image" />
+					$desc_html
+			 		<div id="logo-preview" class = "img-preview">
+			 		$image
+			 		</div>
+EOT;
+		 		break;
+		 		 		
 			case 'text':
 			default:
 		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . $id . '" name="sigf_options[' . $id . ']" placeholder="' . $std . '" value="' . esc_attr( $options[$id] ) . '" />';
@@ -230,12 +249,22 @@ EOT;
 		/* General Settings
 		===========================================*/
 		
-		$this->settings['example_text'] = array(
-			'title'   => __( 'Example Text Input' ),
-			'desc'    => __( 'This is a description for the text input.' ),
-			'std'     => 'Default value',
-			'type'    => 'text',
-			'section' => 'general'
+		$this->settings['logo'] = array(
+			'title'   => __( 'Logo' ),
+			'desc'    => __( 'Upload, or enter URL of image for site' ),
+			'std'     => '',
+			'type'    => 'image',
+			'section' => 'general',
+			'alt' => __('Preview of site logo')
+		);
+		
+		$this->settings['favicon'] = array(
+			'title'   => __( 'Faviscon' ),
+			'desc'    => __( 'Upload, or enter URL of favicon for site' ),
+			'std'     => '',
+			'type'    => 'image',
+			'section' => 'general',
+			'alt' => __('Preview of site favicon')
 		);
 		
 		$this->settings['example_textarea'] = array(
@@ -451,19 +480,21 @@ function sigf_do_settings_fields($page, $section) {
 		return;
 
 	foreach ( (array) $wp_settings_fields[$page][$section] as $field ) {
-		echo <<<EOT
-			<div class = ""option">
-				<label for=" $field['args']['label_for'] class = "description"> $field['title'] </label>
-				<span class ="opt_input">
-		EOT;
+		echo 
+<<<EOT
+			<div class = 'option'>
+				<label for='{$field['args']['label_for']}' class = 'description'> {$field['title']} </label>
+				<span class ='opt_input'>
+EOT;
 
 		call_user_func($field['callback'], $field['args']);
 		
-		echo <<<EOT
+		echo 
+<<<EOT
 				</span>
 			</div>
 		
-		EOT;
+EOT;
 	}
 }
 	
