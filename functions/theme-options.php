@@ -27,7 +27,6 @@ class sigFramework {
 	}
 
 	public function add_pages() {
-		
 		$admin_page = add_theme_page( __( 'Theme Options',$shortName), __( 'Theme Options',$shortName ), 'manage_options', 'sigf-options', array( &$this, 'display_page' ) );
 		
 		add_action( 'admin_print_scripts-' . $admin_page, array( &$this, 'scripts' ) );
@@ -75,7 +74,7 @@ class sigFramework {
 
 
 	public function display_page() {
-		
+			
 //	if ( ! isset( $_REQUEST['settings-updated'] ) ) $_REQUEST['settings-updated'] = false;
 		if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] == true )
 			$saved = "<div class='saved'><p><strong>Options saved</strong></p></div>";
@@ -148,21 +147,27 @@ EOT;
 		
 		extract( $args );
 		
-		$options = $this->options;
-		
-		if ( ! isset( $options[$id] ) && $type != 'checkbox' )
-			$options[$id] = $std;
-		elseif ( ! isset( $options[$id] ) )
-			$options[$id] = 0;
-		
+		$name_id = explode('__',$id);
+		$name = implode('][', $name_id);
+		$options = $this->options;		
+
+		if(count($name_id)==1) {
+			if ( ! isset( $options[$id] ) && $type != 'checkbox' )
+				$options[$id] = $std;
+			elseif ( ! isset( $options[$id] ) )
+				$options[$id] = 0;
+		}
+	
 		$field_class = '';
 		if ( $class != '' )
 			$field_class = ' ' . $class;
-		
+
 		switch ( $type ) {
 			
 			case 'array':
-				foreach($children as $child){
+				foreach($children as $key=>$child){
+					$child['id']= $id.'__'.$key;
+					$child['value'] = $options[$id][$key];
 					$this->display_setting($child);
 				}
 				break;
@@ -173,18 +178,18 @@ EOT;
 			
 			case 'checkbox':
 				
-				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="sigf_options[' . $id . ']" value="1" ' . checked( $options[$id], 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';		
+				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="sigf_options[' . $name . ']" value="1" ' . checked( $value, 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';		
 				break;
 				
 				
 			case 'checkboxes':
 				foreach ( $choices as $value => $label )
-					echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="mytheme_options[' . $id . ']" value="1" ' . checked( $options[$id], 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';
+					echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="mytheme_options[' . $name . ']" value="1" ' . checked( $options[$id], 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';
 				
 			break;
 			
 			case 'select':
-				echo '<select class="select' . $field_class . '" name="sigf_options[' . $id . ']">';
+				echo '<select class="select' . $field_class . '" name="sigf_options[' . $name . ']">';
 				
 				foreach ( $choices as $value => $label )
 					echo '<option value="' . esc_attr( $value ) . '"' . selected( $options[$id], $value, false ) . '>' . $label . '</option>';
@@ -199,7 +204,7 @@ EOT;
 			case 'radio':
 				$i = 0;
 				foreach ( $choices as $value => $label ) {
-					echo '<input class="radio' . $field_class . '" type="radio" name="sigf_options[' . $id . ']" id="' . $id . $i . '" value="' . esc_attr( $value ) . '" ' . checked( $options[$id], $value, false ) . '> <label for="' . $id . $i . '">' . $label . '</label>';
+					echo '<input class="radio' . $field_class . '" type="radio" name="sigf_options[' . $name . ']" id="' . $id . $i . '" value="' . esc_attr( $value ) . '" ' . checked( $options[$id], $value, false ) . '> <label for="' . $id . $i . '">' . $label . '</label>';
 					if ( $i < count( $options ) - 1 )
 						echo '<br />';
 					$i++;
@@ -211,7 +216,7 @@ EOT;
 				break;
 			
 			case 'textarea':
-				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="sigf_options[' . $id . ']" placeholder="' . $std . '" rows="5" cols="30">' . wp_htmledit_pre( $options[$id] ) . '</textarea>';
+				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" rows="5" cols="30">' . wp_htmledit_pre( $options[$id] ) . '</textarea>';
 				
 				if ( $desc != '' )
 					echo '<br /><span class="description">' . $desc . '</span>';
@@ -219,7 +224,7 @@ EOT;
 				break;
 			
 			case 'password':
-				echo '<input class="regular-text' . $field_class . '" type="password" id="' . $id . '" name="sigf_options[' . $id . ']" value="' . esc_attr( $options[$id] ) . '" />';
+				echo '<input class="regular-text' . $field_class . '" type="password" id="' . $id . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $options[$id] ) . '" />';
 				
 				if ( $desc != '' )
 					echo '<br /><span class="description">' . $desc . '</span>';
@@ -237,7 +242,7 @@ EOT;
 				
 		 		echo 
 <<<EOT
-					<input class="regular-text upload_field $field_class" type="text" id=" $id " name="sigf_options[$id]" placeholder=" $std " value="$value" />
+					<input class="regular-text upload_field $field_class" type="text" id=" $id " name="sigf_options[$name]" placeholder=" $std " value="$value" />
 					<input class="upload_image_button" type="button" value="$button" />
 					$desc_html
 			 		<div id="logo-preview" class = "img-preview">
@@ -248,7 +253,7 @@ EOT;
 		 		 		
 			case 'text':
 			default:
-		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . $id . '" name="sigf_options[' . $id . ']" placeholder="' . $std . '" value="' . esc_attr( $options[$id] ) . '" />';
+		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" value="' . esc_attr( $options[$id] ) . '" />';
 		 		
 		 		if ( $desc != '' )
 		 			echo '<br /><span class="description">' . $desc . '</span>';
@@ -462,9 +467,9 @@ EOT;
 		
 		foreach ( $this->settings as $id => $setting ) {
 			$setting['id'] = $id;
+			$setting['value']=$this->options[$id];
 			$this->create_setting( $setting );
-		}
-		
+			}
 	}
 	
 	/**
