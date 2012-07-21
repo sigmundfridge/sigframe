@@ -48,7 +48,8 @@ class sigFramework {
 			'class'   => '',
 			'value' => null,
 			'button' =>	'Upload',
-			'alt' =>''
+			'alt' =>'',
+			'children' => array()
 		);
 			
 		extract( wp_parse_args( $args, $defaults ) );
@@ -62,7 +63,8 @@ class sigFramework {
 			'label_for' => $id,
 			'class'     => $class,
 			'button' 	=> $button,
-			'alt' 		=> $alt
+			'alt' 		=> $alt,
+			'children'	=> $children
 		);
 		
 		if ( $type == 'checkbox' )
@@ -159,6 +161,12 @@ EOT;
 		
 		switch ( $type ) {
 			
+			case 'array':
+				foreach($children as $child){
+					$this->display_setting($child);
+				}
+				break;
+			
 			case 'heading':
 				echo '</td></tr><tr valign="top"><td colspan="2"><h4>' . $desc . '</h4>';
 				break;
@@ -167,6 +175,13 @@ EOT;
 				
 				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="sigf_options[' . $id . ']" value="1" ' . checked( $options[$id], 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';		
 				break;
+				
+				
+			case 'checkboxes':
+				foreach ( $choices as $value => $label )
+					echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="mytheme_options[' . $id . ']" value="1" ' . checked( $options[$id], 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';
+				
+			break;
 			
 			case 'select':
 				echo '<select class="select' . $field_class . '" name="sigf_options[' . $id . ']">';
@@ -302,35 +317,53 @@ EOT;
 		);
 		
 		
-		$cat_order = $options['cat_order']['id'];
+//		$cat_order = $options['cat_order']['id'];
 		$all_ids = get_all_category_ids();
-		if(empty($cat_order))   $cat_order = $all_ids;								
-		$diff = array_diff($all_ids, $cat_order);
-		$cat_order = array_merge($cat_order, $diff);
-		$i=0
-		foreach($cat_order as $category) {
-			$choices[$i] = $i;
-		}
-		
-		$this->settings['featured'] = array(
-			'title'   => __( 'Featured Tag' ),
-			'desc'    => __( 'Posts with this tag will appear as "Featured Posts" in the header' ),
+//		if(empty($cat_order))   $cat_order = $all_ids;								
+//		$diff = array_diff($all_ids, $cat_order);
+//		$cat_order = array_merge($cat_order, $diff);
+//		$i=0;
+		$choices = array();
+		$choice_values = range(1, count($all_ids));
+		$choices = array_combine(range(1, count($all_ids)),array_values($choice_values));
+
+		$this->settings['max_cat'] = array(
+			'title'   => __( 'Maximum headline categories' ),
+			'desc'    => __( 'Select the max number of headline categories to display (empty ones may be ignored)' ),
 			'type'    => 'select',
-			'std'     => '-1',
-			'section' => 'general',
+			'std'     => count($all_ids),
+			'section' => 'head_layout',
 			'choices' => $choices
 		);
+	
 		
-		
-		
-		
-		
-		$this->settings['example_checkbox'] = array(
-			'section' => 'general',
-			'title'   => __( 'Example Checkbox' ),
-			'desc'    => __( 'This is a description for the checkbox.' ),
+		$this->settings['empty_cat'] = array(
+			'title'   => __( 'Show empty categories' ),
+			'desc'    => __( 'Tick to show empty headline categories' ),
 			'type'    => 'checkbox',
-			'std'     => 1 // Set to 1 to be checked by default, 0 to be unchecked by default.
+			'section' => 'head_layout',
+			'std'     => 0 // Set to 1 to be checked by default, 0 to be unchecked by default.
+		);
+		
+		$this->settings['empty_cat'] = array(
+			'title'   => __( 'Show empty categories' ),
+			'desc'    => __( 'Tick to show empty headline categories' ),
+			'type'    => 'array',
+			'section' => 'head_layout',
+			'children'   => array(
+				'id1' => array(
+					'title'   => __( '1' ),
+					'desc'    => __( 'Label1' ),
+					'type'    => 'checkbox',
+					'std'	  => '0'
+				),
+				'id2'=>array(
+					'title'   => __( '2' ),
+					'desc'    => __( 'Label2' ),
+					'type'    => 'checkbox',
+					'std'	  => '0'
+				)		
+			)
 		);
 		
 		$this->settings['example_heading'] = array(
@@ -368,22 +401,6 @@ EOT;
 		
 		/* Appearance
 		===========================================*/
-		
-		$this->settings['header_logo'] = array(
-			'section' => 'appearance',
-			'title'   => __( 'Header Logo' ),
-			'desc'    => __( 'Enter the URL to your logo for the theme header.' ),
-			'type'    => 'text',
-			'std'     => ''
-		);
-		
-		$this->settings['favicon'] = array(
-			'section' => 'appearance',
-			'title'   => __( 'Favicon' ),
-			'desc'    => __( 'Enter the URL to your custom favicon. It should be 16x16 pixels in size.' ),
-			'type'    => 'text',
-			'std'     => ''
-		);
 		
 		$this->settings['custom_css'] = array(
 			'title'   => __( 'Custom Styles' ),
