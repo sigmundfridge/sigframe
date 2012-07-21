@@ -46,7 +46,9 @@ class sigFramework {
 			'section' => 'general',
 			'choices' => array(),
 			'class'   => '',
-			'value' => null
+			'value' => null,
+			'button' =>	'Upload',
+			'alt' =>''
 		);
 			
 		extract( wp_parse_args( $args, $defaults ) );
@@ -58,7 +60,9 @@ class sigFramework {
 			'std'       => $std,
 			'choices'   => $choices,
 			'label_for' => $id,
-			'class'     => $class
+			'class'     => $class,
+			'button' 	=> $button,
+			'alt' 		=> $alt
 		);
 		
 		if ( $type == 'checkbox' )
@@ -73,7 +77,8 @@ class sigFramework {
 //	if ( ! isset( $_REQUEST['settings-updated'] ) ) $_REQUEST['settings-updated'] = false;
 		if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] == true )
 			$saved = "<div class='saved'><p><strong>Options saved</strong></p></div>";
-		else $saved = '';			
+		else $saved = '';	
+		
 echo 
 <<<EOT
 		<div class='wrap'>
@@ -207,7 +212,7 @@ EOT;
 				break;
 				
 				case 'image':
-				$value = esc_attr( $options[$id] ) ;
+				$value = esc_attr($options[$id]) ;
 				if ( $desc != '' )
 					$desc_html = '<br /><span class="description">' . $desc . '</span>';
 		 		else $desc_html='';
@@ -217,8 +222,8 @@ EOT;
 				
 		 		echo 
 <<<EOT
-					<input class="regular-text upload_field $field_class " type="text" id=" $id " name="sigf_options[' $id ']" placeholder=" $std " value=" $value " />
-					<input class="upload_image_button" type="button" value="Upload Image" />
+					<input class="regular-text upload_field $field_class" type="text" id=" $id " name="sigf_options[$id]" placeholder=" $std " value="$value" />
+					<input class="upload_image_button" type="button" value="$button" />
 					$desc_html
 			 		<div id="logo-preview" class = "img-preview">
 			 		$image
@@ -250,30 +255,75 @@ EOT;
 		===========================================*/
 		
 		$this->settings['logo'] = array(
-			'title'   => __( 'Logo' ),
-			'desc'    => __( 'Upload, or enter URL of image for site' ),
+			'title'   => __( 'Custom Logo' ),
+			'desc'    => __( 'Enter a URL or upload an image' ),
 			'std'     => '',
 			'type'    => 'image',
 			'section' => 'general',
-			'alt' => __('Preview of site logo')
+			'alt' => __('Preview of site logo'),
+			'button' => __('Upload Logo')
 		);
 		
-		$this->settings['favicon'] = array(
-			'title'   => __( 'Faviscon' ),
-			'desc'    => __( 'Upload, or enter URL of favicon for site' ),
+		$this->settings['favi'] = array(
+			'title'   => __( 'Custom Favicon' ),
+			'desc'    => __( 'Enter a URL or upload an image. Images should be 16x16 and ico, png or gif format' ),
 			'std'     => '',
 			'type'    => 'image',
 			'section' => 'general',
-			'alt' => __('Preview of site favicon')
+			'alt' => __('Preview of site favicon'),
+			'button' => __('Upload Favicon')
 		);
 		
-		$this->settings['example_textarea'] = array(
-			'title'   => __( 'Example Textarea Input' ),
-			'desc'    => __( 'This is a description for the textarea input.' ),
-			'std'     => 'Default value',
+		
+		$tags = get_tags();
+		$choices = array();
+		foreach($tags as $tag) {
+			$choices[$tag->term_id] = $tag->name;
+		}
+		
+		$this->settings['featured'] = array(
+			'title'   => __( 'Featured Tag' ),
+			'desc'    => __( 'Posts with this tag will appear as "Featured Posts" in the header' ),
+			'type'    => 'select',
+			'std'     => '-1',
+			'section' => 'general',
+			'choices' => array_merge(array(
+							'0' => '*No Headline*',
+							'-1' => '*All Posts')
+							, $choices)
+		);
+		
+		$this->settings['head_tracker'] = array(
+			'title'   => __( 'Tracking Code' ),
+			'desc'    => __( 'Paste your analytics code here. It will be inserted into the head tag of your site' ),
+			'std'     => '',
 			'type'    => 'textarea',
 			'section' => 'general'
 		);
+		
+		
+		$cat_order = $options['cat_order']['id'];
+		$all_ids = get_all_category_ids();
+		if(empty($cat_order))   $cat_order = $all_ids;								
+		$diff = array_diff($all_ids, $cat_order);
+		$cat_order = array_merge($cat_order, $diff);
+		$i=0
+		foreach($cat_order as $category) {
+			$choices[$i] = $i;
+		}
+		
+		$this->settings['featured'] = array(
+			'title'   => __( 'Featured Tag' ),
+			'desc'    => __( 'Posts with this tag will appear as "Featured Posts" in the header' ),
+			'type'    => 'select',
+			'std'     => '-1',
+			'section' => 'general',
+			'choices' => $choices
+		);
+		
+		
+		
+		
 		
 		$this->settings['example_checkbox'] = array(
 			'section' => 'general',
