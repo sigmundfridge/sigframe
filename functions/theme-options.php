@@ -176,16 +176,16 @@ EOT;
 			
 			case 'array':
 				foreach($children as $key=>$child){
-					print '<p>'.$child['id'];
-					echo '<p>';
+					print '<p>Child id'.$child['id'];
+					echo '<p> ID list';
 					print_r($id_list);
-					echo '<p>';
+					echo '<p> key';
 					print_r($key);
-					$child['id']= array_push($id_list,$key);
-					echo '<p>';
+					array_push($id_list,$key);
+					$child['id']= $id_list;
+					echo '<p> Full child';
 					print_r($child);
 					$child['value'] = $value;
-					echo '<p>';
 					$this->display_setting($child);
 				}
 				if ( $desc != '' )
