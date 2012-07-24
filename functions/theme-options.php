@@ -123,7 +123,7 @@ EOT;
 	 */
 	public function display_section() {
 		// code		
-		print_r($this->options);
+//		print_r($this->options);
 	}
 	
 	/**
@@ -152,24 +152,24 @@ EOT;
 			$name = ''.implode('][',$id).'';	
 			$array_ref = implode("']['",$id);
 			$id = str_replace ("'", '', implode('__', $id));
-			$exec = "\$value = \$options['".$array_ref."'];";
-			eval($exec);
 		}
 		elseif(!is_array($id_list)&&$args['type']=='array'){
 			$id_list[]= $args['id'];
-			$value = esc_attr($options[$id]) ;
+			$array_ref = $id;
 		}
 		else {
-			$value = esc_attr($options[$id]) ;
-			$name = $id;
-			if ( ! isset( $options[$id] ) && $type != 'checkbox' )
-				$value = $std;
-			elseif ( ! isset( $options[$id] ) )
-				$value = $std;
+			$name = $id;			
+			$array_ref = $id;
 		}
 		
-
-	
+		$exec = "\$value = esc_attr(\$options['".$array_ref."']);";
+		eval($exec);
+		
+		if ( empty( $value ) && $type != 'checkbox' )
+			$value = $std;
+		elseif ( empty( $value ) )
+			$value = $std;		
+		
 		$field_class = '';
 		if ( $class != '' )
 			$field_class = ' ' . $class;
@@ -198,7 +198,7 @@ EOT;
 			
 			case 'checkbox':
 				
-				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="sigf_options[' . $name . ']" value="1" ' . checked( $value, 1, true ) . ' /> <label for="' . $id . '">' . $desc . '</label>';		
+				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="sigf_options[' . $name . ']" value="1" ' . checked( $value, 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';		
 				break;
 				
 			case 'select':
@@ -267,10 +267,10 @@ EOT;
 		 		echo '<input type="hidden" id="' . $id . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $options[$id] ) . '" />';
 			break;
 			
-			case 'filter':
+			case 'category_filter':
 				$categories = get_categories('hide_empty=0');
 				foreach($categories as $category) {
-					$new[$category->term_id]=$category;	
+					$new[$category->term_id]=$category;
 				}
 				echo '<div class = "cat_menu"><ul id = "sort_cat">';
 				$desc = $args['desc'];
@@ -369,8 +369,7 @@ EOT;
 		$this->settings['cat_order'] = array(
 			'title'   => __( 'Maximum headline categories' ),
 			'desc'    => __( 'Select the max number of headline categories to display (empty ones may be ignored)' ),
-			'type'    => 'filter',
-			'std'     => '',
+			'type'    => 'category_filter',
 			'section' => 'head_layout',
 			'choices' => $merged,
 			'children'   => array(
@@ -387,6 +386,16 @@ EOT;
 
 			)
 		);
+		
+		$child_def = array();
+		$default = array();
+		foreach($this->settings['cat_order']['children'] as $name => $child) {
+			$child_def[$name] = $child['std'];
+		}
+		foreach($merged as $id) {
+			$default[$id] = $child_def;
+		}
+		$this->settings['cat_order']['std'] =$default;
 
 		$max = array();
 		$max_values = range(1, count($all_ids));
