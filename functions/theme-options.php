@@ -122,7 +122,8 @@ EOT;
 	 * @since 1.0
 	 */
 	public function display_section() {
-		// code
+		// code		
+		print_r($this->options);
 	}
 	
 	/**
@@ -154,16 +155,20 @@ EOT;
 			$exec = "\$value = \$options['".$array_ref."'];";
 			eval($exec);
 		}
-		elseif(!is_array($id_list)&&$args['type']=='array')
+		elseif(!is_array($id_list)&&$args['type']=='array'){
 			$id_list[]= $args['id'];
-
+			$value = esc_attr($options[$id]) ;
+		}
 		else {
+			$value = esc_attr($options[$id]) ;
 			$name = $id;
 			if ( ! isset( $options[$id] ) && $type != 'checkbox' )
-				$options[$id] = $std;
+				$value = $std;
 			elseif ( ! isset( $options[$id] ) )
-				$options[$id] = 0;
+				$value = $std;
 		}
+		
+
 	
 		$field_class = '';
 		if ( $class != '' )
@@ -193,20 +198,14 @@ EOT;
 			
 			case 'checkbox':
 				
-				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="sigf_options[' . $name . ']" value="1" ' . checked( $value, 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';		
+				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="sigf_options[' . $name . ']" value="1" ' . checked( $value, 1, true ) . ' /> <label for="' . $id . '">' . $desc . '</label>';		
 				break;
 				
-				
-/*			case 'checkboxes':
-				foreach ( $choices as $value => $label )
-					echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="mytheme_options[' . $name . ']" value="1" ' . checked( $options[$id], 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';
-			break;				
-*/			
 			case 'select':
 				echo '<select class="select' . $field_class . '" name="sigf_options[' . $name . ']">';
 				
-				foreach ( $choices as $value => $label )
-					echo '<option value="' . esc_attr( $value ) . '"' . selected( $options[$id], $value, false ) . '>' . $label . '</option>';
+				foreach ( $choices as $opt_value => $label )
+					echo '<option value="' . esc_attr( $opt_value ) . '"' . selected( $value, $opt_value, false ) . '>' . $label . '</option>';
 				
 				echo '</select>';
 				
@@ -217,8 +216,8 @@ EOT;
 			
 			case 'radio':
 				$i = 0;
-				foreach ( $choices as $value => $label ) {
-					echo '<input class="radio' . $field_class . '" type="radio" name="sigf_options[' . $name . ']" id="' . $id . $i . '" value="' . esc_attr( $value ) . '" ' . checked( $options[$id], $value, false ) . '> <label for="' . $id . $i . '">' . $label . '</label>';
+				foreach ( $choices as $opt_value => $label ) {
+					echo '<input class="radio' . $field_class . '" type="radio" name="sigf_options[' . $name . ']" id="' . $id . $i . '" value="' . esc_attr( $opt_value ) . '" ' . checked( $value, $opt_value, false ) . '> <label for="' . $id . $i . '">' . $label . '</label>';
 					if ( $i < count( $options ) - 1 )
 						echo '<br />';
 					$i++;
@@ -230,7 +229,7 @@ EOT;
 				break;
 			
 			case 'textarea':
-				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" rows="5" cols="30">' . wp_htmledit_pre( $options[$id] ) . '</textarea>';
+				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" rows="5" cols="30">' . wp_htmledit_pre( $value ) . '</textarea>';
 				
 				if ( $desc != '' )
 					echo '<br /><span class="description">' . $desc . '</span>';
@@ -238,7 +237,7 @@ EOT;
 				break;
 			
 			case 'password':
-				echo '<input class="regular-text' . $field_class . '" type="password" id="' . $id . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $options[$id] ) . '" />';
+				echo '<input class="regular-text' . $field_class . '" type="password" id="' . $id . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $value ) . '" />';
 				
 				if ( $desc != '' )
 					echo '<br /><span class="description">' . $desc . '</span>';
@@ -246,12 +245,11 @@ EOT;
 				break;
 				
 				case 'image':
-				$value = esc_attr($options[$id]) ;
 				if ( $desc != '' )
 					$desc_html = '<br /><span class="description">' . $desc . '</span>';
 		 		else $desc_html='';
-		 		if($options[$id])
-		 			$image  = '<img class = "exist-preview" id="logo-p" src="'.$options[$id].'" alt="'.$alt.'" />';
+		 		if($value)
+		 			$image  = '<img class = "exist-preview" id="logo-p" src="'.$value.'" alt="'.$alt.'" />';
 				else $image = '';
 				
 		 		echo 
@@ -282,7 +280,6 @@ EOT;
 					echo $new[$choice]->cat_name.' ('.$new[$choice]->category_count.')';
 					$args ['type'] = 'array';
 					$old_args=$args['id'];
-//					$args ['id'] = array("'".$args['id']."'", $choice);
 					$args ['id'] = array($args['id'], $choice);
 					$this->display_setting($args);
 					echo '</li>';
@@ -375,23 +372,19 @@ EOT;
 			'type'    => 'filter',
 			'std'     => '',
 			'section' => 'head_layout',
-			'choices' => $cat_order,
+			'choices' => $merged,
 			'children'   => array(
-			/*	'hidden' => array(
-					'desc'   => __(''),
-					'type'    => 'hidden',
-					'std'	  => '0'
-				),
-			*/	'home_no' => array(
-					'desc'   => __(''),
-					'type'    => 'text',
-					'std'	  => '5'
-				),
 				'post_no' => array(
 					'desc'   => __(''),
 					'type'    => 'text',
 					'std'	  => '3'
 				),
+				'home_no' => array(
+					'desc'   => __(''),
+					'type'    => 'text',
+					'std'	  => '5'
+				),
+
 			)
 		);
 
