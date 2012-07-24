@@ -130,11 +130,10 @@ EOT;
 	 *
 	 * @since 1.0
 	 */
-	public function display_about_section() {
-		
-		// This displays on the "About" tab. Echo regular HTML here, like so:
-		// echo '<p>Copyright 2011 me@example.com</p>';
-		
+	public function display_carousel_section() {
+	echo '<p>
+			The headline category display uses jCarousel. For more information see the<a href="http://sorgalla.com/projects/jcarousel/">jCarousel homepage</a>
+		  </p>'	;				
 	}
 
 
@@ -146,12 +145,23 @@ EOT;
 	public function display_setting( $args = array() ) {
 		
 		extract( $args );
-		
-		$name_id = explode('__',$id);
-		$name = implode('][', $name_id);
-		$options = $this->options;		
-
-		if(count($name_id)==1) {
+		$options = $this->options;	
+//		$options['cat_order'][6]='Test';
+//		print_r($options);
+		if(is_array($id)) {
+			$id_list = $id;
+//			echo '<p>';
+//			print_r($children);
+			$name = '['.implode('][',$id).']';		
+//			print '<p>'.$name;
+			$id = explode('__', $id);
+			$exec = '\$value = \$options'.$name.';';
+//			echo 'THIS IS THE EXEXT<p>'. $exec;
+			eval($exec);
+//			print '<p>VALUE='.$value.'</p>';
+		}
+		else {
+			$name = $id;
 			if ( ! isset( $options[$id] ) && $type != 'checkbox' )
 				$options[$id] = $std;
 			elseif ( ! isset( $options[$id] ) )
@@ -166,15 +176,26 @@ EOT;
 			
 			case 'array':
 				foreach($children as $key=>$child){
-					$child['id']= $id.'__'.$key;
-					$child['value'] = $options[$id][$key];
+					print '<p>'.$child['id'];
+					echo '<p>';
+					print_r($id_list);
+					echo '<p>';
+					print_r($key);
+					$child['id']= array_push($id_list,$key);
+					echo '<p>';
+					print_r($child);
+					$child['value'] = $value;
+					echo '<p>';
 					$this->display_setting($child);
 				}
-				break;
-			
+				if ( $desc != '' )
+					echo '<span class="description">' . $desc . '</span>';
+				
+				break;		
+				
 			case 'heading':
-				echo '</td></tr><tr valign="top"><td colspan="2"><h4>' . $desc . '</h4>';
-				break;
+				echo '<h4>' . $desc . '</h4>';
+			break;
 			
 			case 'checkbox':
 				
@@ -182,12 +203,11 @@ EOT;
 				break;
 				
 				
-			case 'checkboxes':
+/*			case 'checkboxes':
 				foreach ( $choices as $value => $label )
 					echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="mytheme_options[' . $name . ']" value="1" ' . checked( $options[$id], 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';
-				
-			break;
-			
+			break;				
+*/			
 			case 'select':
 				echo '<select class="select' . $field_class . '" name="sigf_options[' . $name . ']">';
 				
@@ -251,10 +271,25 @@ EOT;
 EOT;
 		 		break;
 		 		 		
+			case 'hidden':
+		 		echo '<input type="hidden" id="' . $id . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $options[$id] ) . '" />';
+			break;
+			
+			case 'filter':
+				echo '<div class = "cat_menu"><ul id = "sort_cat">';
+				foreach($choices as $choice) {
+					echo '<li><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>';
+					$args ['type'] = 'array';
+					$args ['id'] = array("'".$args['id']."'", $choice);
+					$this->display_setting($args);
+					echo '</li>';
+				};	
+			echo '</ul></div>';
+			break;
+		 	
 			case 'text':
 			default:
 		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" value="' . esc_attr( $options[$id] ) . '" />';
-		 		
 		 		if ( $desc != '' )
 		 			echo '<br /><span class="description">' . $desc . '</span>';
 		 		
@@ -321,24 +356,59 @@ EOT;
 			'section' => 'general'
 		);
 		
+		/* Headline Layout
+		===========================================*/
 		
-//		$cat_order = $options['cat_order']['id'];
 		$all_ids = get_all_category_ids();
-//		if(empty($cat_order))   $cat_order = $all_ids;								
-//		$diff = array_diff($all_ids, $cat_order);
-//		$cat_order = array_merge($cat_order, $diff);
+		$cat_order = $this->options['cat_order'];
+		if(empty($cat_order))   $cat_order = $all_ids;								
+		$cat_keys = array_keys($cat_order);
+		$diff = array_diff($all_ids, $cat_order);
+		$merged = array_merge($cat_order, $diff);
 //		$i=0;
-		$choices = array();
-		$choice_values = range(1, count($all_ids));
-		$choices = array_combine(range(1, count($all_ids)),array_values($choice_values));
+		print '<p>';
+		print_r($cat_order);
+		print '<p>';
+		print_r($all_ids);
+		print '<p>';
+		print_r($merged);
+		
+		$this->settings['cat_order'] = array(
+			'title'   => __( 'Maximum headline categories' ),
+			'desc'    => __( 'Select the max number of headline categories to display (empty ones may be ignored)' ),
+			'type'    => 'filter',
+			'std'     => count($all_ids),
+			'section' => 'head_layout',
+			'choices' => $cat_order,
+			'children'   => array(
+				'hidden' => array(
+					'desc'   => __(''),
+					'type'    => 'hidden',
+					'std'	  => '0'
+				),
+				'home_no' => array(
+					'desc'   => __(''),
+					'type'    => 'text',
+					'std'	  => '5'
+				),
+				'post_no' => array(
+					'desc'   => __(''),
+					'type'    => 'text',
+					'std'	  => '5'
+				),
+			)
+		);
 
+		$max = array();
+		$max_values = range(1, count($all_ids));
+		$max = array_combine(range(1, count($all_ids)),array_values($max_values));		
 		$this->settings['max_cat'] = array(
 			'title'   => __( 'Maximum headline categories' ),
 			'desc'    => __( 'Select the max number of headline categories to display (empty ones may be ignored)' ),
 			'type'    => 'select',
 			'std'     => count($all_ids),
 			'section' => 'head_layout',
-			'choices' => $choices
+			'choices' => $max
 		);
 	
 		
@@ -350,28 +420,158 @@ EOT;
 			'std'     => 0 // Set to 1 to be checked by default, 0 to be unchecked by default.
 		);
 		
-		$this->settings['empty_cat'] = array(
-			'title'   => __( 'Show empty categories' ),
-			'desc'    => __( 'Tick to show empty headline categories' ),
+		$this->settings['cat_pages'] = array(
+			'title'   => __( 'Pages to display headlines' ),
+			'desc'    => __( 'Show categories on ticked pages' ),
 			'type'    => 'array',
 			'section' => 'head_layout',
 			'children'   => array(
-				'id1' => array(
-					'title'   => __( '1' ),
-					'desc'    => __( 'Label1' ),
+				'never' => array(
+					'desc'   => __( 'Never display (overrides all other boxes)' ),
 					'type'    => 'checkbox',
 					'std'	  => '0'
 				),
-				'id2'=>array(
-					'title'   => __( '2' ),
-					'desc'    => __( 'Label2' ),
+				'home'=>array(
+					'desc'   => __( 'Homepage' ),
+					'type'    => 'checkbox',
+					'std'	  => '1'
+				),		
+				'posts'=>array(
+					'desc'   => __( 'Posts' ),
+					'type'    => 'checkbox',
+					'std'	  => '1'
+				),		
+				'pages'=>array(
+					'desc'   => __( 'Pages' ),
 					'type'    => 'checkbox',
 					'std'	  => '0'
-				)		
+				),		
+				'archives'=>array(
+					'desc'   => __( 'Archives' ),
+					'type'    => 'checkbox',
+					'std'	  => '0'
+				),		
+				'search'=>array(
+					'desc'   => __( 'Search' ),
+					'type'    => 'checkbox',
+					'std'	  => '0'
+				),		
+			)
+		);
+
+		/* Headline Images
+		===========================================*/
+
+		$this->settings['head_img'] = array(
+			'title'   => __( 'Pages to display featured images under headline categories' ),
+			'desc'    => __( 'Show headline featured images on ticked pages' ),
+			'type'    => 'array',
+			'section' => 'head_images',
+			'children'   => array(
+				'never' => array(
+					'desc'   => __( 'Never display (overrides all other boxes)' ),
+					'type'    => 'checkbox',
+					'std'	  => '0'
+				),
+				'home'=>array(
+					'desc'   => __( 'Homepage' ),
+					'type'    => 'checkbox',
+					'std'	  => '1'
+				),		
+				'posts'=>array(
+					'desc'   => __( 'Posts' ),
+					'type'    => 'checkbox',
+					'std'	  => '1'
+				),		
+				'pages'=>array(
+					'desc'   => __( 'Pages' ),
+					'type'    => 'checkbox',
+					'std'	  => '0'
+				),		
+				'all'=>array(
+					'desc'   => __( 'All Headlines' ),
+					'type'    => 'checkbox',
+					'std'	  => '0'
+				),			
 			)
 		);
 		
-		$this->settings['example_heading'] = array(
+	
+		$this->settings['max_feat_h'] = array(
+			'title'   => __( 'Maximum height of featured images' ),
+			'desc'    => __( 'Enter an integer maximum height for all featured images' ),
+			'std'     => '',
+			'type'    => 'text',
+			'section' => 'head_images',
+		);	
+		
+		
+		/* Carousel
+		===========================================*/		
+		
+		$wrap_options = array('none','circular', 'first', 'last', 'both');
+		$this->settings['wrap'] = array(
+			'title'   => __( 'Wrap style' ),
+			'desc'    => __( 'Choose a wrap method i.e. how the carousel behaves when it reaches the last/first category' ),
+			'type'    => 'select',
+			'std'     => '',
+			'section' => 'carousel',
+			'choices' => array_combine(array_values($wrap_options), array_values($wrap_options))
+		);
+		
+		$anim = array('linear','jswing','easeInQuad','easeOutQuad','easeInOutQuad','easeInCubic','easeOutCubic','easeInOutCubic','easeInQuart','easeOutQuart','easeInOutQuart','easeInSine','easeOutSine','easeInOutSine','easeInExpo','easeOutExpo','easeInOutExpo','easeInQuint','easeOutQuint','easeInOutQuint','easeInCirc','easeOutCirc','easeInOutCirc','easeInElastic','easeOutElastic','easeInOutElastic','easeInBack','easeOutBack','easeInOutBack','easeInBounce','easeOutBounce','easeInOutBounce');
+		$this->settings['easing'] = array(
+			'title'   => __( 'Animation' ),
+			'desc'    => __( 'Choose an animation style. For more information see the<a href="http://jqueryui.com/demos/effect/easing.html">jQuery easing demos</a>' ),
+			'type'    => 'select',
+			'std'     => '',
+			'section' => 'carousel',
+			'choices' => array_combine(array_values($anim), array_values($anim))
+		);
+		
+		$trigger = array('click','mouseover');
+		$this->settings['trigger'] = array(
+			'title'   => __( 'Trigger for scrolling' ),
+			'desc'    => __( 'Scrolling can be triggered by left click or moving the cursor over the scroll bar' ),
+			'type'    => 'select',
+			'std'     => '',
+			'section' => 'carousel',
+			'choices' => array_combine(array_values($trigger), array_values($trigger))
+		);
+		
+		$all_ids = get_all_category_ids();
+		$choice_values = range(1, count($all_ids));
+		$step = array_combine(range(1, count($all_ids)),array_values($choice_values));
+		$this->settings['step'] = array(
+			'title'   => __( 'Step size' ),
+			'desc'    => __( 'How many categories to scroll on each cycle' ),
+			'type'    => 'select',
+			'std'     => '',
+			'section' => 'carousel',
+			'choices' => $step
+		);
+			
+		$this->settings['speed'] = array(
+			'title'   => __( 'Animation speed (ms)' ),
+			'desc'    => __( 'Enter an integer value for the animation speed in ms. Type "0" for off' ),
+			'std'     => '',
+			'type'    => 'text',
+			'section' => 'carousel',
+		);	
+		
+		$this->settings['autoscroll'] = array(
+			'title'   => __( 'Auto scroll delay (seconds)' ),
+			'desc'    => __( 'Enter an integer value for the delay before the headlines auto-scroll (in seconds). Type "0" for no auto scrolling' ),
+			'std'     => '0',
+			'type'    => 'text',
+			'section' => 'carousel',
+		);	
+		
+		
+
+		
+		
+/*		$this->settings['example_heading'] = array(
 			'section' => 'general',
 			'title'   => '', // Not used for headings.
 			'desc'    => 'Example Heading',
@@ -403,11 +603,11 @@ EOT;
 				'choice3' => 'Other Choice 3'
 			)
 		);
-		
+*/		
 		/* Appearance
 		===========================================*/
 		
-		$this->settings['custom_css'] = array(
+/*		$this->settings['custom_css'] = array(
 			'title'   => __( 'Custom Styles' ),
 			'desc'    => __( 'Enter any custom CSS here to apply it to your theme.' ),
 			'std'     => '',
@@ -415,10 +615,10 @@ EOT;
 			'section' => 'appearance',
 			'class'   => 'code'
 		);
-				
+*/				
 		/* Reset
 		===========================================*/
-		
+/*		
 		$this->settings['reset_theme'] = array(
 			'section' => 'reset',
 			'title'   => __( 'Reset theme' ),
@@ -427,7 +627,7 @@ EOT;
 			'class'   => 'warning', // Custom class for CSS
 			'desc'    => __( 'Check this box and click "Save Changes" below to reset theme options to their defaults.' )
 		);
-		
+*/		
 	}
 	
 	/**
@@ -457,8 +657,8 @@ EOT;
 		register_setting( 'sigf_options', 'sigf_options', array ( &$this, 'validate_settings' ) );
 		
 		foreach ( $this->sections as $slug => $title ) {
-			if ( $slug == 'about' )
-				add_settings_section( $slug, $title, array( &$this, 'display_about_section' ), 'sigf-options' );
+			if ( $slug == 'carousel' )
+				add_settings_section( $slug, $title, array( &$this, 'display_carousel_section' ), 'sigf-options' );
 			else
 				add_settings_section( $slug, $title, array( &$this, 'display_section' ), 'sigf-options' );
 		}
@@ -577,7 +777,7 @@ $frame = new sigFramework (
 		'general' => __('General Settings',$shortName),
 		'head_layout' => __('Headlines - Layout',$shortName),
 		'head_images' => __('Headlines - Images',$shortName),
-		'carousel' => __('Carousel',$shortName),
+		'carousel' => __('Headlines - Carousel',$shortName),
 	)
 );
 
