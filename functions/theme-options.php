@@ -146,17 +146,18 @@ EOT;
 		
 		extract( $args );
 		$options = $this->options;	
-//		$options['cat_order'][6]='Test';
 //		print_r($options);
 		if(is_array($id)) {
 			$id_list = $id;
-//			echo '<p>';
-//			print_r($children);
-			$name = '['.implode('][',$id).']';		
-//			print '<p>'.$name;
-			$id = explode('__', $id);
-			$exec = '\$value = \$options'.$name.';';
-//			echo 'THIS IS THE EXEXT<p>'. $exec;
+			echo '<p>';
+	//		print_r($id_list);
+			$name = ''.implode('][',$id).'';	
+			$array_ref = implode("']['",$id);
+			$id = str_replace ("'", '', implode('__', $id));
+	//		print '<p>Name is'.$name;
+
+			$exec = "\$value = \$options['".$array_ref."'];";
+	//		echo 'THIS IS THE EXEXT<p>'. $exec;
 			eval($exec);
 //			print '<p>VALUE='.$value.'</p>';
 		}
@@ -176,17 +177,16 @@ EOT;
 			
 			case 'array':
 				foreach($children as $key=>$child){
-					print '<p>Child id'.$child['id'];
-					echo '<p> ID list';
-					print_r($id_list);
-					echo '<p> key';
-					print_r($key);
-					array_push($id_list,$key);
+//					$quoted_key = "'".$key."'";
+					$quoted_key = $key;
+					$old_list = $id_list;
+					array_push($id_list,$quoted_key);
 					$child['id']= $id_list;
-					echo '<p> Full child';
-					print_r($child);
+//					echo '<p> Full child<br>';
+//					print_r($child);
 					$child['value'] = $value;
 					$this->display_setting($child);
+					$id_list=$old_list;
 				}
 				if ( $desc != '' )
 					echo '<span class="description">' . $desc . '</span>';
@@ -276,20 +276,36 @@ EOT;
 			break;
 			
 			case 'filter':
+				$categories = get_categories('hide_empty=0');
+				foreach($categories as $category) {
+					$new[$category->term_id]=$category;	
+				}
+//				print_r($options);	
+//				print '<br>';
 				echo '<div class = "cat_menu"><ul id = "sort_cat">';
+				$desc = $args['desc'];
+				unset($args['desc']);
+//				print_r($choices);
 				foreach($choices as $choice) {
 					echo '<li><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>';
+//					print '<p>Choice = '.$choice.' new =';
+//					print_r($new);
+					echo $new[$choice]->cat_name.' ('.$new[$choice]->category_count.')';
 					$args ['type'] = 'array';
-					$args ['id'] = array("'".$args['id']."'", $choice);
+					$old_args=$args['id'];
+//					$args ['id'] = array("'".$args['id']."'", $choice);
+					$args ['id'] = array($args['id'], $choice);
 					$this->display_setting($args);
 					echo '</li>';
-				};	
+					$args['id']=$old_args;
+					};	
 			echo '</ul></div>';
+			echo $desc;
 			break;
 		 	
 			case 'text':
 			default:
-		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" value="' . esc_attr( $options[$id] ) . '" />';
+		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" value="' . esc_attr( $value ) . '" />';
 		 		if ( $desc != '' )
 		 			echo '<br /><span class="description">' . $desc . '</span>';
 		 		
@@ -360,33 +376,24 @@ EOT;
 		===========================================*/
 		
 		$all_ids = get_all_category_ids();
-		$cat_order = $this->options['cat_order'];
-		if(empty($cat_order))   $cat_order = $all_ids;								
-		$cat_keys = array_keys($cat_order);
-		$diff = array_diff($all_ids, $cat_order);
-		$merged = array_merge($cat_order, $diff);
-//		$i=0;
-		print '<p>';
-		print_r($cat_order);
-		print '<p>';
-		print_r($all_ids);
-		print '<p>';
-		print_r($merged);
+		if(empty($this->options['cat_order']))   $cat_order = $all_ids;								
+		else $cat_order = array_keys($this->options['cat_order']);
+		$merged = array_merge($cat_order, array_diff($all_ids, $cat_order));
 		
 		$this->settings['cat_order'] = array(
 			'title'   => __( 'Maximum headline categories' ),
 			'desc'    => __( 'Select the max number of headline categories to display (empty ones may be ignored)' ),
 			'type'    => 'filter',
-			'std'     => count($all_ids),
+			'std'     => '',
 			'section' => 'head_layout',
 			'choices' => $cat_order,
 			'children'   => array(
-				'hidden' => array(
+			/*	'hidden' => array(
 					'desc'   => __(''),
 					'type'    => 'hidden',
 					'std'	  => '0'
 				),
-				'home_no' => array(
+			*/	'home_no' => array(
 					'desc'   => __(''),
 					'type'    => 'text',
 					'std'	  => '5'
@@ -394,7 +401,7 @@ EOT;
 				'post_no' => array(
 					'desc'   => __(''),
 					'type'    => 'text',
-					'std'	  => '5'
+					'std'	  => '3'
 				),
 			)
 		);
