@@ -146,21 +146,17 @@ EOT;
 		
 		extract( $args );
 		$options = $this->options;	
-//		print_r($options);
 		if(is_array($id)) {
 			$id_list = $id;
-			echo '<p>';
-	//		print_r($id_list);
 			$name = ''.implode('][',$id).'';	
 			$array_ref = implode("']['",$id);
 			$id = str_replace ("'", '', implode('__', $id));
-	//		print '<p>Name is'.$name;
-
 			$exec = "\$value = \$options['".$array_ref."'];";
-	//		echo 'THIS IS THE EXEXT<p>'. $exec;
 			eval($exec);
-//			print '<p>VALUE='.$value.'</p>';
 		}
+		elseif(!is_array($id_list)&&$args['type']=='array')
+			$id_list[]= $args['id'];
+
 		else {
 			$name = $id;
 			if ( ! isset( $options[$id] ) && $type != 'checkbox' )
@@ -182,8 +178,6 @@ EOT;
 					$old_list = $id_list;
 					array_push($id_list,$quoted_key);
 					$child['id']= $id_list;
-//					echo '<p> Full child<br>';
-//					print_r($child);
 					$child['value'] = $value;
 					$this->display_setting($child);
 					$id_list=$old_list;
@@ -280,16 +274,11 @@ EOT;
 				foreach($categories as $category) {
 					$new[$category->term_id]=$category;	
 				}
-//				print_r($options);	
-//				print '<br>';
 				echo '<div class = "cat_menu"><ul id = "sort_cat">';
 				$desc = $args['desc'];
 				unset($args['desc']);
-//				print_r($choices);
 				foreach($choices as $choice) {
 					echo '<li><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>';
-//					print '<p>Choice = '.$choice.' new =';
-//					print_r($new);
 					echo $new[$choice]->cat_name.' ('.$new[$choice]->category_count.')';
 					$args ['type'] = 'array';
 					$old_args=$args['id'];
@@ -298,7 +287,7 @@ EOT;
 					$this->display_setting($args);
 					echo '</li>';
 					$args['id']=$old_args;
-					};	
+				};	
 			echo '</ul></div>';
 			echo $desc;
 			break;
