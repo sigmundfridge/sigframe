@@ -489,7 +489,7 @@ EOT;
 		$this->settings['max_feat_h'] = array(
 			'title'   => __( 'Maximum height of featured images' ),
 			'desc'    => __( 'Enter an integer maximum height for all featured images' ),
-			'std'     => '',
+			'std'     => '150',
 			'type'    => 'text',
 			'section' => 'head_images',
 		);	
@@ -503,7 +503,7 @@ EOT;
 			'title'   => __( 'Wrap style' ),
 			'desc'    => __( 'Choose a wrap method i.e. how the carousel behaves when it reaches the last/first category' ),
 			'type'    => 'select',
-			'std'     => '',
+			'std'     => 'none',
 			'section' => 'carousel',
 			'choices' => array_combine(array_values($wrap_options), array_values($wrap_options))
 		);
@@ -513,7 +513,7 @@ EOT;
 			'title'   => __( 'Animation' ),
 			'desc'    => __( 'Choose an animation style. For more information see the<a href="http://jqueryui.com/demos/effect/easing.html">jQuery easing demos</a>' ),
 			'type'    => 'select',
-			'std'     => '',
+			'std'     => 'easeInQuad',
 			'section' => 'carousel',
 			'choices' => array_combine(array_values($anim), array_values($anim))
 		);
@@ -523,7 +523,7 @@ EOT;
 			'title'   => __( 'Trigger for scrolling' ),
 			'desc'    => __( 'Scrolling can be triggered by left click or moving the cursor over the scroll bar' ),
 			'type'    => 'select',
-			'std'     => '',
+			'std'     => 'click',
 			'section' => 'carousel',
 			'choices' => array_combine(array_values($trigger), array_values($trigger))
 		);
@@ -535,7 +535,7 @@ EOT;
 			'title'   => __( 'Step size' ),
 			'desc'    => __( 'How many categories to scroll on each cycle' ),
 			'type'    => 'select',
-			'std'     => '',
+			'std'     => '1',
 			'section' => 'carousel',
 			'choices' => $step
 		);
@@ -543,7 +543,7 @@ EOT;
 		$this->settings['speed'] = array(
 			'title'   => __( 'Animation speed (ms)' ),
 			'desc'    => __( 'Enter an integer value for the animation speed in ms. Type "0" for off' ),
-			'std'     => '',
+			'std'     => '100',
 			'type'    => 'text',
 			'section' => 'carousel',
 		);	
