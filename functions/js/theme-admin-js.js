@@ -1,9 +1,10 @@
 jQuery(document).ready(function($) {
-	var result = $('#sort_cat').sortable({
+	var result = $('#cat_order').sortable({
 		axis:'y',
 		containment:'document',
 	});
 	
+	jQuery('#cat_order').parents('.cat_menu').addClass('cat_input');	
 	jQuery("#tab_wrap").tabs();
 	
 	jQuery('.saved').animate({opacity: 0}, 3000, function(){jQuery(this).css('display','none')});

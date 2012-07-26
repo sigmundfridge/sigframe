@@ -45,9 +45,10 @@ class sigFramework {
 			'section' => 'general',
 			'choices' => array(),
 			'class'   => '',
-			'value' => null,
-			'button' =>	'Upload',
-			'alt' =>'',
+			'value'   => null,
+			'button'  =>	'Upload',
+			'alt' 	  =>'',
+			'header'  => '',
 			'children' => array()
 		);
 			
@@ -63,6 +64,7 @@ class sigFramework {
 			'class'     => $class,
 			'button' 	=> $button,
 			'alt' 		=> $alt,
+			'header'	=> $header,
 			'children'	=> $children
 		);
 		
@@ -123,7 +125,7 @@ EOT;
 	 */
 	public function display_section() {
 		// code		
-//		print_r($this->options);
+	//	print_r($this->options);
 	}
 	
 	/**
@@ -268,16 +270,11 @@ EOT;
 			break;
 			
 			case 'category_filter':
-				$categories = get_categories('hide_empty=0');
-				foreach($categories as $category) {
-					$new[$category->term_id]=$category;
-				}
-				echo '<div class = '.$field_class.'><ul id = "'.$id.'">';
+				echo '<div class = '.$field_class.'>'.$header.'<ul id = "'.$id.'">';
 				$desc = $args['desc'];
 				unset($args['desc']);
-				foreach($choices as $choice) {
-					echo '<li><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>';
-					echo $new[$choice]->cat_name.' ('.$new[$choice]->category_count.')';
+				foreach($choices as $choice=>$label) {
+					echo '<li><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'.$label;
 					$args ['type'] = 'array';
 					$old_args=$args['id'];
 					$args ['id'] = array($args['id'], $choice);
@@ -285,8 +282,8 @@ EOT;
 					echo '</li>';
 					$args['id']=$old_args;
 				};	
-			echo '</ul></div>';
-			echo $desc;
+			echo '</ul></div>
+					<span class = "filter_desc">'.$desc.'</span>';
 			break;
 		 	
 			case 'text':
@@ -360,11 +357,23 @@ EOT;
 		
 		/* Headline Layout
 		===========================================*/
-		
 		$all_ids = get_all_category_ids();
-		if(empty($this->options['cat_order']))   $cat_order = $all_ids;								
-		else $cat_order = array_keys($this->options['cat_order']);
+		if(!is_array($this->options['cat_order']))   $cat_order = $all_ids;								
+		else {
+			$cat_order = array_keys($this->options['cat_order']);
+			$cat_order = array_intersect($cat_order,$all_ids);
+		}
 		$merged = array_merge($cat_order, array_diff($all_ids, $cat_order));
+	
+		$categories = get_categories('hide_empty=0');
+		foreach($categories as $category) {
+			$cat_label[$category->term_id] =  $category->cat_name.' ('.$category->category_count.')';
+		}
+		
+		$choices = array();
+		foreach($merged as $id) {
+			$choices[$id] = $cat_label[$id];
+		}		
 		
 		$this->settings['cat_order'] = array(
 			'title'   => __( 'Choose category order and post count for headlines' ),
@@ -377,9 +386,10 @@ EOT;
 							<div class = 'cat left'>Category (Total post count)</div><div class = 'right post_no'><span class = 'head'>Number of posts to display:</span><span class = 'post_home post_head'>Home</span><span class = 'post_other post_head'>Other</span></div>
 						  </div>
 						  <div class = 'clear'></div>",
+			'class' => 'cat_menu',
 			'type'    => 'category_filter',
 			'section' => 'head_layout',
-			'choices' => $merged,
+			'choices' => $choices,
 			'children'   => array(
 				'post_no' => array(
 					'desc'   => __(''),
