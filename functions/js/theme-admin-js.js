@@ -37,10 +37,13 @@
 			image = img_hold.find('.preview').attr('src',url);
 			img_div.animate({opacity: 1}, 300, function() {image.animate({opacity: 1}, 300, function() {})});
 		}
-		$('.deselect').click(function(){
+		$deselect = $('.deselect');
+		$deselect.click(function(){
 			if(this.checked){$(this).siblings(':checkbox').removeAttr('checked');}
 			else {}
-		});
+		}).siblings().click(function(){
+			if($deselect.checked){}
+			else {$deselect.removeAttr('checked');}
+		})
 	});
-
 })(jQuery);

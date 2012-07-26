@@ -125,7 +125,7 @@ EOT;
 	 */
 	public function display_section() {
 		// code		
-	//	print_r($this->options);
+		print_r($this->options);
 	}
 	
 	/**
@@ -170,7 +170,7 @@ EOT;
 		if ( empty( $value ) && $type != 'checkbox' )
 			$value = $std;
 		elseif ( empty( $value ) )
-			$value = $std;		
+			$value = 0;		
 		
 		$field_class = '';
 		if ( $class != '' )
@@ -190,7 +190,7 @@ EOT;
 					$id_list=$old_list;
 				}
 				if ( $desc != '' )
-					echo '<span class="description">' . $desc . '</span>';
+					echo '<span class="description array">' . $desc . '</span>';
 				
 				break;		
 				
@@ -516,10 +516,10 @@ EOT;
 		
 	
 		$this->settings['max_feat_h'] = array(
+			'type'    => 'text',
 			'title'   => __( 'Maximum height of featured images' ),
 			'desc'    => __( 'Enter an integer maximum height for all featured images' ),
 			'std'     => '150',
-			'type'    => 'text',
 			'section' => 'head_images',
 		);	
 		
@@ -529,9 +529,9 @@ EOT;
 		
 		$wrap_options = array('none','circular', 'first', 'last', 'both');
 		$this->settings['wrap'] = array(
+			'type'    => 'select',
 			'title'   => __( 'Wrap style' ),
 			'desc'    => __( 'Choose a wrap method i.e. how the carousel behaves when it reaches the last/first category' ),
-			'type'    => 'select',
 			'std'     => 'none',
 			'section' => 'carousel',
 			'choices' => array_combine(array_values($wrap_options), array_values($wrap_options))
@@ -539,9 +539,9 @@ EOT;
 		
 		$anim = array('linear','jswing','easeInQuad','easeOutQuad','easeInOutQuad','easeInCubic','easeOutCubic','easeInOutCubic','easeInQuart','easeOutQuart','easeInOutQuart','easeInSine','easeOutSine','easeInOutSine','easeInExpo','easeOutExpo','easeInOutExpo','easeInQuint','easeOutQuint','easeInOutQuint','easeInCirc','easeOutCirc','easeInOutCirc','easeInElastic','easeOutElastic','easeInOutElastic','easeInBack','easeOutBack','easeInOutBack','easeInBounce','easeOutBounce','easeInOutBounce');
 		$this->settings['easing'] = array(
+			'type'    => 'select',
 			'title'   => __( 'Animation' ),
 			'desc'    => __( 'Choose an animation style. For more information see the<a href="http://jqueryui.com/demos/effect/easing.html">jQuery easing demos</a>' ),
-			'type'    => 'select',
 			'std'     => 'easeInQuad',
 			'section' => 'carousel',
 			'choices' => array_combine(array_values($anim), array_values($anim))
@@ -549,9 +549,9 @@ EOT;
 		
 		$trigger = array('click','mouseover');
 		$this->settings['trigger'] = array(
+			'type'    => 'select',
 			'title'   => __( 'Trigger for scrolling' ),
 			'desc'    => __( 'Scrolling can be triggered by left click or moving the cursor over the scroll bar' ),
-			'type'    => 'select',
 			'std'     => 'click',
 			'section' => 'carousel',
 			'choices' => array_combine(array_values($trigger), array_values($trigger))
@@ -561,27 +561,27 @@ EOT;
 		$choice_values = range(1, count($all_ids));
 		$step = array_combine(range(1, count($all_ids)),array_values($choice_values));
 		$this->settings['step'] = array(
+			'type'    => 'select',
 			'title'   => __( 'Step size' ),
 			'desc'    => __( 'How many categories to scroll on each cycle' ),
-			'type'    => 'select',
 			'std'     => '1',
 			'section' => 'carousel',
 			'choices' => $step
 		);
 			
 		$this->settings['speed'] = array(
+			'type'    => 'text',
 			'title'   => __( 'Animation speed (ms)' ),
 			'desc'    => __( 'Enter an integer value for the animation speed in ms. Type "0" for off' ),
 			'std'     => '100',
-			'type'    => 'text',
 			'section' => 'carousel',
 		);	
 		
 		$this->settings['autoscroll'] = array(
+			'type'    => 'text',
 			'title'   => __( 'Auto scroll delay (seconds)' ),
 			'desc'    => __( 'Enter an integer value for the delay before the headlines auto-scroll (in seconds). Type "0" for no auto scrolling' ),
 			'std'     => '0',
-			'type'    => 'text',
 			'section' => 'carousel',
 		);	
 		
@@ -657,10 +657,22 @@ EOT;
 		
 		$default_settings = array();
 		foreach ( $this->settings as $id => $setting ) {
-			if ( $setting['type'] != 'heading' )
+			if ( $setting['type'] != 'heading' ){
 				$default_settings[$id] = $setting['std'];
+			}
+			if($setting['type'] == 'array') {
+				foreach($setting['children'] as $sub_id => $child) {
+					$default_settings[$id][$sub_id] = $child['std'];
+				}
+			}
+			elseif($setting['type'] == 'filter') {
+				foreach($setting['choices'] as $sub2_id => $choice){
+					foreach($setting['children'] as $sub_id => $child) {
+						$default_settings[$id][$sub2_id][$sub_id] = $child['std'];
+					}
+				}
+			}
 		}
-		
 		update_option( 'sigf_options', $default_settings );
 		
 	}

@@ -23,6 +23,7 @@ input.regular-text{width: 20em;}
 textarea {width: 320px;}
 textarea, input {font-family:helvetica;}
 span.description, span.text_desc{word-wrap: break-word; font-size:11.5px;vertical-align: top;display:inline-block; margin-left:10px;width:300px;}
+span.description.array {margin:10px 0 0 25px;}
 span.text_desc{margin: 0px 0px 0 20px;}
 label.upload_desc{}
 label.checkbox_desc{margin:0 5px 0 0; width:auto;}
