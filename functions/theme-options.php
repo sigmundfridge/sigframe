@@ -212,7 +212,7 @@ EOT;
 				echo '</select>';
 				
 				if ( $desc != '' )
-					echo '<br /><span class="description">' . $desc . '</span>';
+					echo '<span class="description">' . $desc . '</span>';
 				
 				break;
 			
@@ -226,7 +226,7 @@ EOT;
 				}
 				
 				if ( $desc != '' )
-					echo '<br /><span class="description">' . $desc . '</span>';
+					echo '<span class="description">' . $desc . '</span>';
 				
 				break;
 			
@@ -234,7 +234,7 @@ EOT;
 				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" rows="5" cols="30">' . wp_htmledit_pre( $value ) . '</textarea>';
 				
 				if ( $desc != '' )
-					echo '<br /><span class="description">' . $desc . '</span>';
+					echo '<span class="description">' . $desc . '</span>';
 				
 				break;
 			
@@ -242,13 +242,13 @@ EOT;
 				echo '<input class="regular-text' . $field_class . '" type="password" id="' . $id . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $value ) . '" />';
 				
 				if ( $desc != '' )
-					echo '<br /><span class="description">' . $desc . '</span>';
+					echo '<span class="description">' . $desc . '</span>';
 				
 				break;
 				
 				case 'image':
 				if ( $desc != '' )
-					$desc_html = '<br /><span class="description">' . $desc . '</span>';
+					$desc_html = '<span class="description">' . $desc . '</span>';
 		 		else $desc_html='';
 		 		if($value)
 		 			$image  = '<img class = "exist-preview" id="logo-p" src="'.$value.'" alt="'.$alt.'" />';
@@ -283,14 +283,14 @@ EOT;
 					$args['id']=$old_args;
 				};	
 			echo '</ul></div>
-					<span class = "filter_desc">'.$desc.'</span>';
+					<span class = "text_desc">'.$desc.'</span>';
 			break;
 		 	
 			case 'text':
 			default:
 		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" value="' . esc_attr( $value ) . '" />';
 		 		if ( $desc != '' )
-		 			echo '<br /><span class="description">' . $desc . '</span>';
+		 			echo '<span class="description">' . $desc . '</span>';
 		 		
 		 		break;
 		 	
@@ -445,7 +445,8 @@ EOT;
 				'never' => array(
 					'desc'   => __( 'Never display (overrides all other boxes)' ),
 					'type'    => 'checkbox',
-					'std'	  => '0'
+					'std'	  => '0',
+					'class'	  => 'deselect'
 				),
 				'home'=>array(
 					'desc'   => __( 'Homepage' ),
@@ -487,7 +488,8 @@ EOT;
 				'never' => array(
 					'desc'   => __( 'Never display (overrides all other boxes)' ),
 					'type'    => 'checkbox',
-					'std'	  => '0'
+					'std'	  => '0',
+					'class'	  => 'deselect'
 				),
 				'home'=>array(
 					'desc'   => __( 'Homepage' ),
@@ -771,7 +773,7 @@ function sigf_do_settings_fields($page, $section) {
 		echo 
 <<<EOT
 			<div class = 'option'>
-				<label for='{$field['args']['label_for']}' class = 'description'> {$field['title']} </label>
+				<label for='{$field['args']['label_for']}' class = 'main_label'> {$field['title']} </label>
 				<span class ='opt_input'>
 EOT;
 

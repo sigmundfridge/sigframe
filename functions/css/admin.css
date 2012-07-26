@@ -11,9 +11,9 @@ AUTHOR: Nick Jones based on theme by Robert Ellis aa
 .options h2, .options h3 {color:#e03a3a;}
 .options h2 {font-weight:500; font-size:30px;}
 .options h3 {font-weight: 500;font-size: 25px;padding: 15px 0 17px 10px;margin: 0px 0 0px 0; border-bottom:1px solid silver;}
-.option .opt_label , .option .opt_input {display: block;padding:0;}
-.option .opt_label { font-size:1.2em;font-weight: 600;}
-.option .opt_input {margin:15px 25px 0 25px;}
+.option .opt_input {display: block;padding:0;}
+.option label.main_label { font-size:1.2em;font-weight: 600;}
+.option .opt_input {margin:15px 0px 0 25px;}
 
 .section {position:relative;clear:both;moz-border-radius: 6px;-webkit-border-radius: 6px;-border-radius: 6px;background: #FFF;border-color: silver;border-style: solid;border-width: 1px;padding:10px 20px 30px 20px;/*margin-top:10px;*/}
 .section p {margin: 1.2em 0 0 0;}
@@ -22,8 +22,8 @@ AUTHOR: Nick Jones based on theme by Robert Ellis aa
 input.regular-text{width: 20em;}
 textarea {width: 320px;}
 textarea, input {font-family:helvetica;}
-label.description, span.text_desc{word-wrap: break-word; font-size:11.5px;vertical-align: top;display:inline-block; margin-left:10px;width:300px;}
-span.text_desc{margin: 20px 0px 0 0px;}
+span.description, span.text_desc{word-wrap: break-word; font-size:11.5px;vertical-align: top;display:inline-block; margin-left:10px;width:300px;}
+span.text_desc{margin: 0px 0px 0 20px;}
 label.upload_desc{}
 label.checkbox_desc{margin:0 5px 0 0; width:auto;}
 
