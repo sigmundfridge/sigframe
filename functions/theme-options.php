@@ -272,7 +272,7 @@ EOT;
 				foreach($categories as $category) {
 					$new[$category->term_id]=$category;
 				}
-				echo '<div class = "cat_menu"><ul id = "sort_cat">';
+				echo '<div class = '.$field_class.'><ul id = "'.$id.'">';
 				$desc = $args['desc'];
 				unset($args['desc']);
 				foreach($choices as $choice) {
@@ -367,8 +367,16 @@ EOT;
 		$merged = array_merge($cat_order, array_diff($all_ids, $cat_order));
 		
 		$this->settings['cat_order'] = array(
-			'title'   => __( 'Maximum headline categories' ),
-			'desc'    => __( 'Select the max number of headline categories to display (empty ones may be ignored)' ),
+			'title'   => __( 'Choose category order and post count for headlines' ),
+			'desc'    => __( '<p>Drag the category titles to set the order they will be displayed in the headlines.</p>
+							<p>The number in the brackets is the total number of posts under each category</p>
+							<p>Use the input boxes next to each category to determine how many posts will be displayed under each headline category on the front page, and on all other pages</p>
+							<p>The default is 3 posts on the home page, and 1 on all other pages</p>
+							' ),
+			'header'  => "<div id = 'sort_title'>
+							<div class = 'cat left'>Category (Total post count)</div><div class = 'right post_no'><span class = 'head'>Number of posts to display:</span><span class = 'post_home post_head'>Home</span><span class = 'post_other post_head'>Other</span></div>
+						  </div>
+						  <div class = 'clear'></div>",
 			'type'    => 'category_filter',
 			'section' => 'head_layout',
 			'choices' => $merged,
