@@ -341,10 +341,10 @@ EOT;
 			'type'    => 'select',
 			'std'     => '-1',
 			'section' => 'general',
-			'choices' => array_merge(array(
-							'0' => '*No Headline*',
-							'-1' => '*All Posts')
-							, $choices)
+			'choices' => array(
+							'-1' => '*All Posts*',
+							'0' => '*No Headline*')
+							+ $choices
 		);
 		
 		$this->settings['head_tracker'] = array(
@@ -731,7 +731,6 @@ EOT;
 	public function styles() {
 		
 		wp_enqueue_style("theme_style", get_stylesheet_directory_uri()."/functions/css/admin.css", false, "1.0", "all");
-		//wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/base/jquery-ui.css'); 
 		wp_enqueue_style('thickbox');
 	
 	}		
@@ -758,31 +757,31 @@ EOT;
 		
 	}
 	
-	function sigf_do_settings_sections($page) {
-	global $wp_settings_sections, $wp_settings_fields;
-
-	if ( !isset($wp_settings_sections) || !isset($wp_settings_sections[$page]) )
-		return;
-	foreach ( (array) $wp_settings_sections[$page] as $section ) {
-		if ( !isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']]) )
-			continue;
-		echo '<div class="section" id = "'.$section['id'].'">';
-		if ( $section['title'] )
-			echo "<h3>{$section['title']}</h3>\n";
-		call_user_func($section['callback'], $section);
-		$this->sigf_do_settings_fields($page, $section['id']);
-		echo '</div>';
-		}
+	public function sigf_do_settings_sections($page) {
+		global $wp_settings_sections, $wp_settings_fields;
+	
+		if ( !isset($wp_settings_sections) || !isset($wp_settings_sections[$page]) )
+			return;
+		foreach ( (array) $wp_settings_sections[$page] as $section ) {
+			if ( !isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']]) )
+				continue;
+			echo '<div class="section" id = "'.$section['id'].'">';
+			if ( $section['title'] )
+				echo "<h3>{$section['title']}</h3>\n";
+			call_user_func($section['callback'], $section);
+			$this->sigf_do_settings_fields($page, $section['id']);
+			echo '</div>';
+			}
 	}
 
-function sigf_do_settings_fields($page, $section) {
-	global $wp_settings_fields;
-
-	if ( !isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section]) )
-		return;
-
-	foreach ( (array) $wp_settings_fields[$page][$section] as $field ) {
-		echo 
+	public function sigf_do_settings_fields($page, $section) {
+		global $wp_settings_fields;
+	
+		if ( !isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section]) )
+			return;
+	
+		foreach ( (array) $wp_settings_fields[$page][$section] as $field ) {
+			echo 
 <<<EOT
 			<div class = 'option'>
 				<label for='{$field['args']['label_for']}' class = 'main_label'> {$field['title']} </label>
@@ -797,12 +796,121 @@ EOT;
 			</div>
 		
 EOT;
+		}
 	}
-}
 	
+	public function sigf_generate_featured(){
+		$tag = $this->options['featured'];
+		if($tag):
+			if($tag == -1) $tag = '';
+			$rand_posts = get_posts( array( 'numberposts' => 1, 'orderby' => 'rand', 'tag_id' => $tag ) );
+			if(!empty($rand_posts)):
+				foreach( $rand_posts as $post ) : ?>
+				<h2 id = 'headline'>Featured Post | <a href="<?php the_permalink();?>"><?php the_title(); ?></a></h2>
+				<?php endforeach;
+			endif;
+		endif;
+	}
+	
+	public function sigf_generate_headlines(){
+		$options = $this->options;
+				
+		if($this->sigf_shouldihere($options['cat_pages'])) {
+				
+			print 'max'. $max_cat = $options['max_cat'];		
+			print ' empty'. $show_empty_cat=$options['empty_cat'];
+				
+			$cat_list = $options['cat_order'];
+			
+			if(is_home()) $display_opt_key = 'home_no';
+			else $display_opt_key = 'post_no';
+			
+			$list = '<ul>';
+			foreach($cat_list as $id => $cat_settings) {
+				$list .= '<li>
+							<ul class="latest">
+								<li><h2 class="latest"><a href="'.esc_url(get_category_link( $id )).'">'.get_cat_name($id).'</a></h2></li>';											
+				$args = array( 'numberposts' => $cat_settings[$display_opt_key], 'category' =>$id);
+				print_r($args);
+			}
+			
+		echo $list;
+		
+		}
+	
+	/*		
+					
+			
+				}
+				
+				
+				$cat_ids = $options['cat_order']['id'];
+
+			
+				$list_empty_cat = $this->options['cat_order']['empty'];
+				$cat_no = count_categories($max_cat, $list_empty_cat, $show_empty_cat);		
+		?>
+		
+		<ul id="latestPosts" class = "<?php if($cat_no>6) echo "jcarousel-skin-simple carousel"; else echo "no-carousel"?>">
+	
+		<?php 
+			for($i=0;$i<$max_cat;$i++) {
+				$cat_id = $cat_ids[$i];
+				$args = array( 'numberposts' => $post_no, 'category' =>$cat_id);
+				$category = get_category($cat_id);
+	
+				if($category->category_count>0 || $show_empty_cat){
+		?>		
+		
+		<li>
+				<ul class="latest">
+					<li>
+		<?php 		$feat_posts = get_posts( $args );
+					foreach( $feat_posts as $post ) : setup_postdata( $post );
+	?>
+					<li>
+						<ul class = "latestPost">
+							<li class="list-time"><?php the_time('d'); ?>.<?php the_time('M'); ?></li>
+							<li class="list-title"><a href="<?php the_permalink() ?>" rel="bookmark"><?php the_title(); ?></a></li>
+		<?php 
+					$location = is_home() ? $options['home_img'] : $options['other_img'];
+					if ( has_post_thumbnail()&&$location) : ?>
+							<li><a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>" ><?php the_post_thumbnail(); ?></a></li>
+		<?php 	
+					endif; ?>
+							<li class="latest-excerpt"><?php the_excerpt(); ?></li>
+						</ul>
+					</li>
+		<?php 		endforeach; ?>
+				</ul>
+			</li>
+	<?php 			} 
+			} ?>
+		</ul>		
+	<?php	
+		*/
+		
+		
+	}
+		public function sigf_whereami(){
+			return array(	'home'=>is_home(),
+							'posts'=>is_single(), 
+							'pages'=>is_page(),
+							'archives'=>is_archive(),
+							'search'=>is_search(),
+						);
+		}
+		
+		public function sigf_shouldihere($input_arr){
+			if($input_arr['never']) return 0;
+			else {
+				$compare =  array_intersect_assoc($input_arr, $this->sigf_whereami());
+				return  !empty($compare);
+			}
+		}
 }
 
-$frame = new sigFramework (
+$sigf_frame = new sigFramework (
 	array(
 		'general' => __('General Settings',$shortName),
 		'head_layout' => __('Headlines - Layout',$shortName),
@@ -818,6 +926,5 @@ function sigf_option( $option ) {
 	else
 		return false;
 }
-
 
 ?>
