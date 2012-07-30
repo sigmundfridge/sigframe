@@ -1,10 +1,5 @@
 <?php 
-	$defaults = array('empty_cat'=>0,'max_cat'=>8, 'home_img'=>1, 'other_img'=>0, 'feat_tag'=>-1, 'max_feat_h'=>150,'cat'=>array(1,1,0,0,0,0));
 	$options = get_option('nMod_theme_options',$defaults);
-
-	$list_empty_cat = $options['cat_order']['empty'];
-	$max_cat = $options['max_cat'];
-	$show_empty_cat=$options['empty_cat'];
 	$cat_no = count_categories($max_cat, $list_empty_cat, $show_empty_cat);		
 ?>
 
@@ -24,34 +19,9 @@
 	<link rel="icon" type="image/png" href="<?php echo $options['favicon']?>">
 
 <?php 
-	add_action('wp_print_scripts', 'do_script'); // For use on the Front end (ie. Theme)
-	add_action('wp_print_styles', 'do_style'); // For use on the Front end (ie. Theme)
-	$param = array('size'=>$cat_no, 'carousel'=>$options['carousel']);
-	do_action('wp_print_scripts', $param);	
 	wp_head();	
-	
-	
-	function do_script($param) {
-		wp_register_script("jcarousel-js", get_stylesheet_directory_uri()."/scripts/jquery.jcarousel.min.js",array("jquery"));
-		wp_register_script("carousel-start", get_stylesheet_directory_uri()."/scripts/carousel-main.js",array("jcarousel-js"));
-		wp_register_script("jquery-ui", "https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js", array	("jcarousel-js"));
-		wp_enqueue_script('jquery');
-		if($param['size']>6) {
-			wp_enqueue_script("jcarousel-js");
-			wp_enqueue_script("carousel-start");
-			wp_enqueue_script("jquery-ui");
 
-			$params = array('carousel_size' => $param['size'],'carousel_easing'=>$param['carousel']['easing'],'carousel_step' => $param['carousel']['step'], 'carousel_wrap'=>__($param['carousel']['wrap']),'carousel_speed'=>$param['carousel']['speed'],'carousel_auto'=>$param['carousel']['autoscroll'],'carousel_trigger'=>$param['carousel']['trigger']);
-			wp_localize_script( 'carousel-start', 'carouselParam', $params);
-		}
-	}
-
-	function do_style() {
-		wp_enqueue_style('jcarousel-css', get_stylesheet_directory_uri()."/css/jcarousel-simple/skin.css");
-	}
-
-
-	echo stripslashes($options['head_tracker']); 
+	echo stripslashes($frame->options['head_tracker']); 
 ?>
 
 </head>

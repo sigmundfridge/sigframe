@@ -17,8 +17,9 @@ class sigFramework {
 		$this->themeName = get_current_theme();
 		$this->shortName = 'sWOM';
 	
-		add_action( 'admin_menu', array( &$this, 'add_pages' ) );
-		add_action( 'admin_init', array( &$this, 'register_settings' ) );
+		add_action( 'admin_menu', array( &$this, 'add_admin_pages' ) );
+		add_action( 'admin_init', array( &$this, 'register_admin_settings' ) );
+		add_action( 'after_setup_theme', array(&$this, 'theme_init'));
 		
 		if ( ! get_option( 'sigf_options' ) )
 			$this->initialize_settings();
@@ -26,11 +27,11 @@ class sigFramework {
 		
 	}
 
-	public function add_pages() {
+	public function add_admin_pages() {
 		$admin_page = add_theme_page( __( 'Theme Options',$shortName), __( 'Theme Options',$shortName ), 'manage_options', 'sigf-options', array( &$this, 'display_page' ) );
 		
-		add_action( 'admin_print_scripts-' . $admin_page, array( &$this, 'scripts' ) );
-		add_action( 'admin_print_styles-' . $admin_page, array( &$this, 'styles' ) );
+		add_action( 'admin_print_scripts-' . $admin_page, array( &$this, 'admin_scripts' ) );
+		add_action( 'admin_print_styles-' . $admin_page, array( &$this, 'admin_styles' ) );
 		
 	}
 
@@ -125,7 +126,7 @@ EOT;
 	 */
 	public function display_section() {
 		// code		
-		print_r($this->options);
+//		print_r($this->options);
 	}
 	
 	/**
@@ -682,7 +683,7 @@ EOT;
 	*
 	* @since 1.0
 	*/
-	public function register_settings() {
+	public function register_admin_settings() {
 		
 		register_setting( 'sigf_options', 'sigf_options', array ( &$this, 'validate_settings' ) );
 		
@@ -707,20 +708,13 @@ EOT;
 	*
 	* @since 1.0
 	*/
-	public function scripts() {
+	public function admin_scripts() {
 	 	wp_enqueue_script('jquery-ui-sortable');
   		wp_enqueue_script('jquery-ui-tabs');
  		wp_enqueue_script('media-upload');
 		wp_enqueue_script('thickbox');
 		wp_enqueue_script('admin-scripts', get_stylesheet_directory_uri()."/functions/js/theme-admin-js.js");
-	
-		if ( function_exists( 'add_theme_support' ) ) { 
-			add_theme_support( 'post-thumbnails' );
-			if (isset($options['max_feat_h'])) $height = $options['max_feat_h'];
-			else $height = 170;
-			set_post_thumbnail_size( 134, $height, true ); // Normal post thumbnails
-			add_image_size( 'featured_full', 400, 9999 ); // Permalink thumbnail size
-		}
+		$this->register_thumbs();
 	}
 	
 	/**
@@ -728,12 +722,49 @@ EOT;
 	*
 	* @since 1.0
 	*/
-	public function styles() {
+	public function admin_styles() {
 		
 		wp_enqueue_style("theme_style", get_stylesheet_directory_uri()."/functions/css/admin.css", false, "1.0", "all");
 		wp_enqueue_style('thickbox');
 	
-	}		
+	}	
+	
+	public function theme_init() {
+		$this->register_thumbs();
+		add_action('wp_print_scripts', array(&$this, 'do_theme_script')); // For use on the Front end (ie. Theme)
+	//	do_action('wp_print_scripts', $param);		
+		add_action('wp_print_styles', array(&$this, 'do_theme_style')); // For use on the Front end (ie. Theme)		
+	}
+	
+	function do_theme_script() {
+		wp_register_script("jcarousel-js", get_stylesheet_directory_uri()."/scripts/jquery.jcarousel.min.js",array("jquery"));
+		wp_register_script("carousel-start", get_stylesheet_directory_uri()."/scripts/carousel-main.js",array("jcarousel-js"));
+		wp_register_script("jquery-ui", "https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js", array	("jcarousel-js"));
+		$carousel_count = $this->category_count();
+		if($carousel_count>6) {
+			wp_enqueue_script('jquery');
+			wp_enqueue_script("jcarousel-js");
+			wp_enqueue_script("carousel-start");
+			wp_enqueue_script("jquery-ui");
+		}
+		$options=$this->options;
+		$params = array('carousel_size' => $carousel_count,'carousel_easing'=>$options['easing'],'carousel_step' => $options['step'], 'carousel_wrap'=>__($options['wrap']),'carousel_speed'=>$options['speed'],'carousel_auto'=>$options['autoscroll'],'carousel_trigger'=>$options['trigger']);
+		wp_localize_script( 'carousel-start', 'carouselParam', $params);
+	}
+	
+	function do_theme_style() {
+		wp_enqueue_style('jcarousel-css', get_stylesheet_directory_uri()."/css/jcarousel-simple/skin.css");
+	}
+	
+	public function register_thumbs() {
+		if ( function_exists( 'add_theme_support' ) ) { 
+			add_theme_support( 'post-thumbnails' );
+			if (isset($this->options['max_feat_h'])) $height = $this->options['max_feat_h'];
+			else $height = 170;
+			set_post_thumbnail_size( 134, $height, true ); // Normal post thumbnails
+			add_image_size( 'featured_full', 400, 9999 ); // Permalink thumbnail size
+		}
+	}	
 
 	
 	/**
@@ -800,6 +831,7 @@ EOT;
 	}
 	
 	public function sigf_generate_featured(){
+		global $post;
 		$tag = $this->options['featured'];
 		if($tag):
 			if($tag == -1) $tag = '';
@@ -814,100 +846,102 @@ EOT;
 	
 	public function sigf_generate_headlines(){
 		$options = $this->options;
-				
+		global $post;
+		
 		if($this->sigf_shouldihere($options['cat_pages'])) {
-				
-			print 'max'. $max_cat = $options['max_cat'];		
-			print ' empty'. $show_empty_cat=$options['empty_cat'];
+
+			$max_cat = $options['max_cat'];		
+			$show_empty_cat=$options['empty_cat'];
 				
 			$cat_list = $options['cat_order'];
 			
 			if(is_home()) $display_opt_key = 'home_no';
 			else $display_opt_key = 'post_no';
+		
+			//reorder categories with id as a key
+			$categories = get_categories('hide_empty=0');
+
+			foreach($categories as $category) {
+				$cat_all[$category->term_id] =  $category;
+			}
 			
-			$list = '<ul>';
+			$list = '';
+			$empty_cats = 0;
+			$i = 0;
 			foreach($cat_list as $id => $cat_settings) {
-				$list .= '<li>
+				$feat_posts = array();
+				if($cat_all[$id]->category_count>0 || $show_empty_cat){
+					$list .= '<li>
 							<ul class="latest">
 								<li><h2 class="latest"><a href="'.esc_url(get_category_link( $id )).'">'.get_cat_name($id).'</a></h2></li>';											
-				$args = array( 'numberposts' => $cat_settings[$display_opt_key], 'category' =>$id);
-				print_r($args);
-			}
-			
-		echo $list;
-		
-		}
-	
-	/*		
-					
-			
+					$args = array( 'numberposts' => $cat_settings[$display_opt_key], 'category' =>$id);
+					$i++;
+					$feat_posts = get_posts( $args );
+					foreach($feat_posts as $post) {
+						setup_postdata( $post );
+						$list .= '<li>
+									<ul class = "latestPost">
+										<li class="list-time">'.get_the_time('d').' '.get_the_time('M').'</li>
+										<li class="list-title"><a href="'.get_permalink(). 'rel="bookmark">'.get_the_title().'</a></li>';
+						if(has_post_thumbnail()&&$this->sigf_shouldihere($options['head_img'])) {
+							$list .= '	<li><a href="'.get_permalink().'" title="'.the_title_attribute(array('echo'=>0)).'" >'.get_the_post_thumbnail().'</a></li>';
+						}
+						$list .= '		<li class="latest-excerpt">'.get_the_excerpt().'</li>
+									</ul>
+								 </li>';						
+						wp_reset_postdata();
+					}
+					$list .= '</ul></li>';
+					if($i<$max_cat) continue;
+					else break;
 				}
-				
-				
-				$cat_ids = $options['cat_order']['id'];
-
-			
-				$list_empty_cat = $this->options['cat_order']['empty'];
-				$cat_no = count_categories($max_cat, $list_empty_cat, $show_empty_cat);		
-		?>
-		
-		<ul id="latestPosts" class = "<?php if($cat_no>6) echo "jcarousel-skin-simple carousel"; else echo "no-carousel"?>">
-	
-		<?php 
-			for($i=0;$i<$max_cat;$i++) {
-				$cat_id = $cat_ids[$i];
-				$args = array( 'numberposts' => $post_no, 'category' =>$cat_id);
-				$category = get_category($cat_id);
-	
-				if($category->category_count>0 || $show_empty_cat){
-		?>		
-		
-		<li>
-				<ul class="latest">
-					<li>
-		<?php 		$feat_posts = get_posts( $args );
-					foreach( $feat_posts as $post ) : setup_postdata( $post );
-	?>
-					<li>
-						<ul class = "latestPost">
-							<li class="list-time"><?php the_time('d'); ?>.<?php the_time('M'); ?></li>
-							<li class="list-title"><a href="<?php the_permalink() ?>" rel="bookmark"><?php the_title(); ?></a></li>
-		<?php 
-					$location = is_home() ? $options['home_img'] : $options['other_img'];
-					if ( has_post_thumbnail()&&$location) : ?>
-							<li><a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>" ><?php the_post_thumbnail(); ?></a></li>
-		<?php 	
-					endif; ?>
-							<li class="latest-excerpt"><?php the_excerpt(); ?></li>
-						</ul>
-					</li>
-		<?php 		endforeach; ?>
-				</ul>
-			</li>
-	<?php 			} 
-			} ?>
-		</ul>		
-	<?php	
-		*/
-		
-		
-	}
-		public function sigf_whereami(){
-			return array(	'home'=>is_home(),
-							'posts'=>is_single(), 
-							'pages'=>is_page(),
-							'archives'=>is_archive(),
-							'search'=>is_search(),
-						);
-		}
-		
-		public function sigf_shouldihere($input_arr){
-			if($input_arr['never']) return 0;
-			else {
-				$compare =  array_intersect_assoc($input_arr, $this->sigf_whereami());
-				return  !empty($compare);
 			}
+			
+			$category_count = $this->category_count();
+			$carousel = $category_count>6 ? 'jcarousel-skin-simple carousel' : 'no-carousel';
+			echo 
+<<<EOT
+			<ul id="latestPosts" class = "$carousel">$list</ul>
+EOT;
+		
 		}
+	}
+		
+	public function sigf_whereami(){
+		return array(	'home'=>is_home(),
+						'posts'=>is_single(), 
+						'pages'=>is_page(),
+						'archives'=>is_archive(),
+						'search'=>is_search(),
+					);
+	}
+		
+	public function sigf_shouldihere($input_arr){
+		if($input_arr['never']) return 0;
+		elseif($input_array['all']) return 1;
+		else {
+			$compare =  array_intersect_assoc($input_arr, $this->sigf_whereami());
+			return  !empty($compare);
+		}
+	}
+	
+	public function category_count() {
+		$cat_list = $this->options['cat_order'];
+		$show_empty = $this->options['empty_cat'];
+		$max_cat = $this->options['max_cat'];
+		$all_cats = get_categories(array('hide_empty'=>0));		
+		$all_cat_by_id = array();
+		foreach($all_cats as $cat) $all_cat_by_id[$cat->term_id]=$cat;	
+		$i=0;
+		foreach($cat_list as $id =>$cat) {
+			if($all_cat_by_id[$id]->category_count>0 || $show_empty) $i++;
+			if($i<$max_cat) continue;
+			else break;
+		}
+		
+		return $i;
+	}
+		
 }
 
 $sigf_frame = new sigFramework (
