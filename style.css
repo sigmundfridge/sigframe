@@ -37,7 +37,7 @@ img.post-image{border:1px solid silver;margin:0 0 5px;padding:2px;width:134px;}
 h2.latest{height: 36px;border-top:1px solid silver;font-weight:400;}
 #header h1{float: left;margin-top: 10px;padding:0;}
 #header h1 img#main_logo {border:0px none;padding:0px;vertical-align:text-bottom;}
-#applesearch{position: absolute;right: 0;top: 37px;margin:0;padding:0;}
+#header #applesearch{position: absolute;right: 0;top: 37px;margin:0;padding:0;}
 .js .carousel {display:none;}
 
 
@@ -98,6 +98,7 @@ li.comment.bypostauthor{background:#eff6ff;}
 /*Sidebar*/
 #sidebar h3{font-family:Didot, Georgia, serif;font-size:16px;margin-top:12px;padding-top:0;}
 #sidebar li{list-style-type:none;}
+#sidebar #applesearch{padding-top:10px;}
 
 /*Footer*/
 .one-col{border-top:1px solid silver;display:inline;float:left;margin-right:20px;width:140px;}

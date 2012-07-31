@@ -5,7 +5,7 @@ NO CATEGORIES => LINE 21 ERROR
 */
 
 //load theme menu
-require_once ( 'functions/theme-options.php' );
+require_once ( 'functions/swom_theme.php' );
 
 //Clean junk from wp_head
 //remove_action('wp_head', 'rsd_link'); - might be needed for some users?
@@ -21,13 +21,6 @@ function wpbeginner_remove_version() {
 	return '';
 }
 add_filter('the_generator', 'wpbeginner_remove_version');
-
-function count_categories($max_cat, $empty_list, $show_empty){
-	if(empty($empty_list)) $empty_list = array();
-	if(!$show_empty) $cat_count = $max_cat - 1 - array_sum(array_slice($empty_list, 0, $max_cat-1));
-	else $cat_count = $max_cat;
-	return $cat_count;
-}
 
 // Produces a list of pages in the header without whitespace -- er, I mean negative space.
 function sandbox_globalnav() {
