@@ -232,7 +232,7 @@ EOT;
 				break;
 			
 			case 'textarea':
-				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" rows="5" cols="30">' . wp_htmledit_pre( $value ) . '</textarea>';
+				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" rows="5" cols="30">' . html_entity_decode( $value ) . '</textarea>';
 				
 				if ( $desc != '' )
 					echo '<span class="description">' . $desc . '</span>';
@@ -709,11 +709,11 @@ EOT;
 	* @since 1.0
 	*/
 	public function admin_scripts() {
+		wp_enqueue_script('admin-scripts', get_stylesheet_directory_uri()."/functions/js/theme-admin-js.js");
 	 	wp_enqueue_script('jquery-ui-sortable');
   		wp_enqueue_script('jquery-ui-tabs');
  		wp_enqueue_script('media-upload');
 		wp_enqueue_script('thickbox');
-		wp_enqueue_script('admin-scripts', get_stylesheet_directory_uri()."/functions/js/theme-admin-js.js");
 		$this->register_thumbs();
 	}
 	
@@ -732,7 +732,6 @@ EOT;
 	public function theme_init() {
 		$this->register_thumbs();
 		add_action('wp_print_scripts', array(&$this, 'do_theme_script')); // For use on the Front end (ie. Theme)
-	//	do_action('wp_print_scripts', $param);		
 		add_action('wp_print_styles', array(&$this, 'do_theme_style')); // For use on the Front end (ie. Theme)		
 	}
 	

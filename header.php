@@ -1,8 +1,3 @@
-<?php 
-	$options = get_option('nMod_theme_options',$defaults);
-	$cat_no = count_categories($max_cat, $list_empty_cat, $show_empty_cat);		
-?>
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" <?php sandbox_blog_lang(); ?>>
 <head profile="http://gmpg.org/xfn/11">
@@ -16,12 +11,12 @@
 	<link rel="alternate" type="application/rss+xml" href="<?php bloginfo('comments_rss2_url') ?>" title="<?php echo wp_specialchars(get_bloginfo('name'), 1) ?> <?php _e('Comments RSS feed', 'sandbox'); ?>" />
 	<link rel="pingback" href="<?php bloginfo('pingback_url') ?>" />
 	<?php if ( is_singular() && get_option( 'thread_comments' ) ) wp_enqueue_script( 'comment-reply' ); ?>
-	<link rel="icon" type="image/png" href="<?php echo $options['favicon']?>">
+	<link rel="icon" type="image/png" href="<?php echo sigf_option('favi')?>">
 
 <?php 
 	wp_head();	
 
-	echo stripslashes($frame->options['head_tracker']); 
+	echo stripslashes(html_entity_decode(sigf_option('head_tracker'))); 
 ?>
 
 </head>
@@ -34,8 +29,8 @@
 		<ul id="pages">
 			<?php wp_list_pages('title_li=&sort_column=post_title&sort_order=desc&depth=1' ) ?>
 		</ul>
-		<?php if($options['logo']) :?>
-			<h1><a class="blog-title" href="<?php echo get_settings('home') ?>/" title="<?php bloginfo('name') ?>" rel="home"><img id='main_logo' alt = "<?php bloginfo('name') ?>" src="<?php echo $options['logo'] ?>"/></a><span> | <?php bloginfo('description') ?></span></h1>
+		<?php if(sigf_option('logo')) :?>
+			<h1><a class="blog-title" href="<?php echo get_settings('home') ?>/" title="<?php bloginfo('name') ?>" rel="home"><img id='main_logo' alt = "<?php bloginfo('name') ?>" src="<?php echo sigf_option('logo') ?>"/></a><span> | <?php bloginfo('description') ?></span></h1>
 		<?php else : ?>
 			<h1><a class="blog-title" href="<?php echo get_settings('home') ?>/" title="<?php bloginfo('name') ?>" rel="home"><?php bloginfo('name') ?></a><span> | <?php bloginfo('description') ?></span></h1>
 		<?php endif; ?>
