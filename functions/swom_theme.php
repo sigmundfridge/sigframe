@@ -1,7 +1,7 @@
 <?php
 require('sig_frame.php');
 
-class swomTheme extends sigFramework {
+class SwomTheme extends SigFramework {
 
 	function __construct($sections) {
 		$this->shortName = 'sWOM';
@@ -21,7 +21,8 @@ class swomTheme extends sigFramework {
 			'type'    => 'image',
 			'section' => 'general',
 			'alt' => __('Preview of site logo'),
-			'button' => __('Upload Logo')
+			'button' => __('Upload Logo'),
+			'validation'=> 'text'
 		);
 		
 		$this->settings['favi'] = array(
@@ -31,7 +32,8 @@ class swomTheme extends sigFramework {
 			'type'    => 'image',
 			'section' => 'general',
 			'alt' => __('Preview of site favicon'),
-			'button' => __('Upload Favicon')
+			'button' => __('Upload Favicon'),
+			'validation'=> 'text'
 		);
 		
 		
@@ -58,7 +60,8 @@ class swomTheme extends sigFramework {
 			'desc'    => __( 'Paste your analytics code here. It will be inserted into the head tag of your site' ),
 			'std'     => '',
 			'type'    => 'textarea',
-			'section' => 'general'
+			'section' => 'general',
+			'validation' => 'html'
 		);
 		
 		/* Headline Layout
@@ -100,12 +103,14 @@ class swomTheme extends sigFramework {
 				'post_no' => array(
 					'desc'   => __(''),
 					'type'    => 'text',
-					'std'	  => '3'
+					'std'	  => '3',
+					'validation' => 'integer'
 				),
 				'home_no' => array(
 					'desc'   => __(''),
 					'type'    => 'text',
-					'std'	  => '5'
+					'std'	  => '5',
+					'validation' => 'integer'
 				),
 
 			)
@@ -227,6 +232,7 @@ class swomTheme extends sigFramework {
 			'desc'    => __( 'Enter an integer maximum height for all featured images' ),
 			'std'     => '150',
 			'section' => 'head_images',
+			'validation' => 'integer'
 		);	
 		
 		
@@ -281,6 +287,7 @@ class swomTheme extends sigFramework {
 			'desc'    => __( 'Enter an integer value for the animation speed in ms. Type "0" for off' ),
 			'std'     => '100',
 			'section' => 'carousel',
+			'validation' => 'integer'
 		);	
 		
 		$this->settings['autoscroll'] = array(
@@ -289,6 +296,7 @@ class swomTheme extends sigFramework {
 			'desc'    => __( 'Enter an integer value for the delay before the headlines auto-scroll (in seconds). Type "0" for no auto scrolling' ),
 			'std'     => '0',
 			'section' => 'carousel',
+			'validation' => 'integer'
 		);	
 
 		/* Reset
@@ -376,7 +384,7 @@ EOT;
 
 }
 
-$swom_theme = new swomTheme (
+$swomTheme = new SwomTheme (
 	array(
 		'general' => __('General Settings',$shortName),
 		'head_layout' => __('Headlines - Layout',$shortName),

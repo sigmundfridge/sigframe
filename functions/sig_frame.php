@@ -1,13 +1,14 @@
 <?php
 
-class sigFramework {
+class SigFramework {
 
-	private $themeName;
-	public $shortName;
-	public $sections;
-	private $checkboxes;
-	public $settings;
-	public $options;
+	protected $themeName;
+	protected $checkboxes;
+	protected $shortName;
+	protected $sections;
+	protected $settings;
+	protected $options;
+	protected $validation;
 
 	public function __construct($sections) {
 		$this->checkboxes = array();
@@ -124,6 +125,7 @@ EOT;
 	 * @since 1.0
 	 */
 	public function display_section() {
+	//	print_r($this->options);
 	}
 
 
@@ -448,28 +450,6 @@ EOT;
 			add_image_size( 'featured_full', 400, 9999 ); // Permalink thumbnail size
 		}
 	}	
-
-	
-	/**
-	* Validate settings
-	*
-	* @since 1.0
-	*/
-	public function validate_settings( $input ) {
-		
-		if ( ! isset( $input['reset_theme'] ) ) {
-			$options = get_option( 'sigf_options' );
-			
-			foreach ( $this->checkboxes as $id ) {
-				if ( isset( $options[$id] ) && ! isset( $input[$id] ) )
-					unset( $options[$id] );
-			}
-			
-			return $input;
-		}
-		return false;
-		
-	}
 	
 	public function sigf_do_settings_sections($page) {
 		global $wp_settings_sections, $wp_settings_fields;
@@ -613,11 +593,96 @@ EOT;
 			if($all_cat_by_id[$id]->category_count>0 || $show_empty) $i++;
 			if($i<$max_cat) continue;
 			else break;
-		}
-		
+		}	
 		return $i;
+	}	
+	
+	/**
+	* Validate settings
+	*
+	* @since 1.0
+	public function validate_settings( $inputs ) {
+		if ( ! isset( $input['reset_theme'] ) ) {
+			$options = get_option( 'sigf_options' );
+			
+			foreach ( $this->checkboxes as $id ) {
+				if ( isset( $options[$id] ) && ! isset( $input[$id] ) )
+					unset( $options[$id] );
+			}
+			
+			return $input;
+		}
+		return false;	
+	}*/
+	public function validate_settings( $inputs ) {
+		foreach($inputs as $key => $input) {
+			$test = $this->check_input($key, $input);
+		//	if(!$test) echo 'input test '. false;
+		}		
+		return $inputs;	
 	}
+	
+	public function check_input($key, $input) {
+		if(is_array($input)) {
+			foreach($input as $key => $child) {
+				return $this->check_input($key, $child);
+			}
+		}
+	//	else {
+	//		$setting_pointer = find_setting ($key, $this->settings);
+	//	}
+			return $key;
+		// return test_input ($input, $setting_pointer);
+	}
+	
+	public function find_setting($option_id, $settings) {
+	/*	if(in_array($option_id,$this->validation) //.......
+		else {
+			foreach($settings as $id => $setting) {
+				if($option_id == $id) 
+					{
+						$this->validation[]=array($option_id, &$setting);
+						return &$setting;
+					}
+				elseif($setting['type']=='array'||$setting['type']='filter'){
+					foreach($settings['children'] as $child_id => $child) {
+						find_setting($option_id, $child);
+					}
+				else return false;
+				}
+			}
+		}
+	*/	
+	}
+	
+	public function test_input($input, $setting){
+	//	if(isset($setting['validation']) $check = $setting['validation'];
+	//	else $check = $setting['type'];
+	//	print '<p>checked '.$input
 		
+/*		switch($setting) {
+			case 'integer':
+				if(!preg_match("/^\-?\d+$/", $input)) return false;
+				else return true;
+			case 'html':
+//				if(//check) return false;
+//				else return true;
+			case 'text':
+//				if(//check) return false;
+//				else return true;
+			case 'select':
+//				if(not in settings choices values) return false;
+//				else return true;
+			case 'checkbox':
+				return $input == 1 || $input == 0 ? 1 : 0 ;
+			break;
+		}
+*/		
+		return true;
+		
+	}
+	
+	
 }
 
 function sigf_option( $option ) {
