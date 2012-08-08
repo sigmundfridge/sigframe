@@ -74,72 +74,83 @@ class validCheck {
 		if(!is_array($input)) {	
 				print '<p>**************START******</p>';
 				print '<p>**INPUT**</p>';
-				print '<p><b>Element</b> is <i>'.$key.'</i> with a value of</p><p>';
-				print_r($input);
-				print '</p>';
-				$input = $this->validate_element($input, $key);
+				print '<p><b>Element</b> is <i>'.$key.'</i> with a value of '.$input;
+				$result = $this->validate_element($input, $key);
 				print '<p>**OUTPUT**</p>';
-				print '<p>Result is : '.$input.'</p>';
-				if($input === false) print '<p>*Test FAILED</p>';
-				
+				print '<p>Result is : '.$result.'</p>';
+				if($result === false) {
+					print '<p>*Test FAILED</p>';
+					$input = $result;
+				}
 				return $input;
 			}
-		foreach($input as $id => $child) {
-				$input = $this->get_inputs($child, $id);
+		foreach($input as $id => &$child) {
+				$this->get_inputs($child, $id);
 		}	
 	}
 	
 	public function validate_element($input, $key) {
-		$check = $this->get_validation_type($key, $input, $this->settings)	;
-		print '<p>Returns...  '.$check;
+		if(array_key_exists($key,$this->validation_ref)) {
+			$setting = $this->validation_ref[$key]['setting'];
+		}
+		else {
+			$setting = $this->find_setting($key, $this->settings);
+			$this->validation_ref[$key]['setting']=$setting;	
+		}
+
+		$type = $setting['validation']? $setting['validation']: $setting['type'];
+		$this->validation_ref[$key]['type']=$type;
+		$check = $this->validation_check($input, $type, $setting);	
+		
 		return $check;
 	}
 	
 	
-	
-	public function get_validation_type($id, $value, $settings) {
-		if(array_key_exists($id,$this->validation_ref)) 
-			{print '<p>'.$id.'<b>   is already in list   </b>';return $this->validation_check($value, $this->validation_ref[$id]['type'], $this->validation_ref[$id]['setting']);}
+	public function find_setting($id, $settings) {
+		$return = array();
 		foreach($settings as $key => $setting) {
 			if(strcmp($key,$id)==0) {
-				$type = $setting['validation']? $setting['validation']: $setting['type'];
-				$this->validation_ref[$key]['type']=$type;
-				$this->validation_ref[$key]['setting']=&$setting;
-				return $this->validation_check($value, $type, $setting);//$type;
+				return $setting;
 			}
 			elseif($setting['type']=='array'||$setting['type']=='category_filter') {
-				$return = $this->get_validation_type($id, $value, $setting['children']);
+				$return = array_merge($return, $this->find_setting($id, $setting['children']));
 			}		
 		}
-		
-		return $return;	
+		return $return;
 	}
 	
 	public function validation_check($value, $type, $setting) {
 		print '<p>Checking '.$value.' as '.$type.'<p>';//.' result  '.strcmp((string)$key,(string)$id);
-	//	print_r($setting);
-	//	print '<br>';
-			if(is_null($value)) return'';
+			if(is_null($value)) {				print '<p>null</p>';
+			return '';}
 	
 			switch($type) {
 			case 'integer':
+				print '<p>Integer</p>';
 				return (preg_match("/^\-?\d+$/", $value))? $value: false;
 			case 'html':
+				print '<p>HTML</p>';
 				return (preg_match("/^([\d\w]*(&( amp | apos | gt | lt | nbsp | quot | bull | hellip | [lr][ds]quo | [mn]dash | permil          
 							| \#[1-9][0-9]{1,3} | [A-Za-z] [0-9A-Za-z]+ ))[\d\w]*)*$/i",$value))
 							? $value:false;
 			case 'text':
+							print '<p>text</p>';
 				return (ctype_alnum($value))? $value: false;
 			case 'select':
+							print '<p>select</p>';
 				return array_key_exists($value, $setting['choices'])?$value:false;
 			case 'checkbox':
+				print '<p>box</p>';
 				return $values == 1 || $value == 0 ?$value: 0 ;
 			case 'imgurl':
+				print '<p>img</p>';
 				return (preg_match("/^https?:\/\/[\w\d\.]+\.[\w\d\/\-]+\/[\w\d\-]+\.(jp?g|gif|png)$/i", $value))? $value: false;
 		//		return (preg_match("/^https?:\/\/([a-z\-]+\.)+[a-z]{2,6}(/[^/#?]+)+\.(jpg|gif|png)$/i", $value))? true: false;
 		//		return (preg_match("/^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?.(?:jp?g|gif|png)$/i", $value))? true: false;
 			default:
-				return $value;
+							print '<p>default</p>';
+
+				return false;
 			break;
 		}
 	}
