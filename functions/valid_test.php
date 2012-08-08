@@ -8,28 +8,28 @@ class validCheck {
 		$this->options = array ( 'logo' => 'http://sigfrid.co.uk/frame/wp-content/uploads/2012/07/logo-300x61.png', 
 					'favi' => 'http://sigfrid.co.uk/frame/wp-content/uploads/2012/07/favicon1.png',
 					'featured' => 5 ,
-					'head_tracker' => null,
+					'head_tracker' =>htmlentities('<script></script>'),
 					'cat_order' => array ( 
-						'8' => array ( 'post_no' => 3, 
-										'home_no' => 5 ), 
+						'8' => array ( 'post_no' => 1, 
+										'home_no' => 2 ), 
 						'6' => array ( 'post_no' => 3, 
-										'home_no' => 5 ), 	
-						'7' => array ( 'post_no' => 3, 
-										'home_no' => 5 ),
-						'1' => array ( 'post_no' => 3, 
-										'home_no' => 5 ), 
-						'9' => array ( 'post_no' => 3, 
-										'home_no' => 5 ), 
-						'14' => array ( 'post_no' => 3, 
-										'home_no' => 5 ), 
-						'10' => array ( 'post_no' => 3, 
-										'home_no' => 5 ), 
-						'11' => array ( 'post_no' => 3,
-										'home_no' => 5 ), 
-						'12' => array ( 'post_no' => 3,
-										'home_no' => 5 ),
-						'13' => array ( 'post_no' => 3,
-										'home_no' => 5 )
+										'home_no' => 4 ), 	
+						'7' => array ( 'post_no' => 5, 
+										'home_no' => 6 ),
+						'1' => array ( 'post_no' => 7, 
+										'home_no' =>8 ), 
+						'9' => array ( 'post_no' => 9, 
+										'home_no' => 10 ), 
+						'14' => array ( 'post_no' => 11, 
+										'home_no' => 12 ), 
+						'10' => array ( 'post_no' => 13, 
+										'home_no' => 14), 
+						'11' => array ( 'post_no' => 15,
+										'home_no' => 16 ), 
+						'12' => array ( 'post_no' => 17,
+										'home_no' => 18 ),
+						'13' => array ( 'post_no' => 19,
+										'home_no' => 20 )
 					), 
 					'max_cat' => 10, 
 					'max_feat_h' => 150, 
@@ -58,25 +58,21 @@ class validCheck {
 	
 	public function validate_settings( $inputs ) {
 			$results = $this->get_inputs($inputs, '');
-			print '<p>';
-	//		print_r($results);
 		foreach($results as $option) {
-			print $this->get_validation_type($option['key'], $option['value'],$this->settings);
-			//$check = $this->validation_check($option['value'], $this->validation_ref[$option['key']], null);
-		
+			if(!$this->get_validation_type($option['key'], $option['value'],$this->settings))
+				print '<p> FAILED';
+			//print_r($this->validation_ref);//$check = $this->validation_check($option['value'], $this->validation_ref[$option['key']], null);
+			//		print '<p>';
 		}
 			return $inputs;	
 	}
 	
-		//	else {
-	//		$setting_pointer = find_setting ($key, $this->settings);
-	//	}
-	//		return $key;
-		// return test_input ($input, $setting_pointer);
-
+	public function clean_input($value) {
+	}
+	
 	
 	public function get_inputs(&$input_arr, $key) {
-		if(!is_array($input_arr)) return array(array('key'=>$key, 'value'=>$input_arr)); //i.e. nothing
+		if(!is_array($input_arr)) return array(array('key'=>$key, 'value'=>&$input_arr)); //i.e. nothing
 		
 		$return = array();
 		foreach($input_arr as $id => $child) {
@@ -87,29 +83,53 @@ class validCheck {
 	}
 	
 	public function get_validation_type($id, $value, $settings) {
-	 //	if(array_key_exists($id,$this->validation_ref)) return $this->validation_ref[$key];
-		if(array_key_exists($id,$this->validation_ref)) return $this->validation_check($value, $this->validation_ref[$key], $settings);
+		if(array_key_exists($id,$this->validation_ref)) return $this->validation_check($value, $this->validation_ref[$id]['type'], $this->validation_ref[$id]['setting']);
 		foreach($settings as $key => $setting) {
-		//	print '<p>Input '.$id.' against '.$key.' result  '.strcmp((string)$key,(string)$id);
 			if(strcmp($key,$id)==0) {
 				$type = $setting['validation']? $setting['validation']: $setting['type'];
-				$this->validation_ref[$key]=$type;
-				//return $type;
+				$this->validation_ref[$key]['type']=$type;
+				$this->validation_ref[$key]['setting']=&$setting;
 				return $this->validation_check($value, $type, $setting);//$type;
 			}
 			elseif($setting['type']=='array'||$setting['type']=='category_filter') {
-				$this->get_validation_type($id, $value, $setting['children']);
+				$return = $this->get_validation_type($id, $value, $setting['children']);
 			}		
 		}
 		
 		return $return;	
 	}
 	
-	public function validation_check($value, $type,$setting) {
+	public function validation_check($value, $type, $setting) {
 		print '<p>Input '.$value.' as '.$type.'<p>';//.' result  '.strcmp((string)$key,(string)$id);
-		print_r($setting);
-		print '<br>';
-		return 1;
+	//	print_r($setting);
+	//	print '<br>';
+			if(is_null($value)) return true;
+	
+			switch($type) {
+			case 'integer':
+				return (preg_match("/^\-?\d+$/", $value))? true: false;
+			case 'html':
+				return (preg_match("/^([\d\w]*(&( amp | apos | gt | lt | nbsp | quot | bull | hellip | [lr][ds]quo | [mn]dash | permil          
+							| \#[1-9][0-9]{1,3} | [A-Za-z] [0-9A-Za-z]+ ))[\d\w]*)*$/i",$value))
+							? true:false;
+			case 'text':
+				return (ctype_alnum($value))? true: false;
+			case 'select':
+				return array_key_exists($value, $setting['choices'])?true:false;
+			case 'checkbox':
+				return $values == 1 || $value == 0 ? 1 : 0 ;
+			case 'imgurl':
+				return (preg_match("/^https?:\/\/[\w\d\.]+\.[\w\d\/\-]+\/[\w\d\-]+\.(jp?g|gif|png)$/i", $value))? true: false;
+		//		return (preg_match("/^https?:\/\/([a-z\-]+\.)+[a-z]{2,6}(/[^/#?]+)+\.(jpg|gif|png)$/i", $value))? true: false;
+		//		return (preg_match("/^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?.(?:jp?g|gif|png)$/i", $value))? true: false;
+		default:
+				return true;
+			break;
+		}
+		
+		return true;
+	
+	return 1;
 	}
 
 
@@ -127,7 +147,7 @@ class validCheck {
 			'section' => 'general',
 			'alt' => 'Preview of site logo',
 			'button' => 'Upload Logo',
-			'validation'=> 'text'
+			'validation'=> 'imgurl'
 		);
 		
 		$this->settings['favi'] = array(
@@ -138,7 +158,7 @@ class validCheck {
 			'section' => 'general',
 			'alt' => 'Preview of site favicon',
 			'button' => 'Upload Favicon',
-			'validation'=> 'text'
+			'validation'=> 'imgurl'
 		);
 		
 		
@@ -160,7 +180,7 @@ class validCheck {
 			'title'   =>  'Tracking Code',
 			'desc'    =>  'Paste your analytics code here. It will be inserted into the head tag of your site',
 			'std'     => '',
-			'type'    => 'textarea',
+			'type'    => 'textarea_html',
 			'section' => 'general',
 			'validation' => 'html'
 		);

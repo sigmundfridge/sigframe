@@ -219,7 +219,7 @@ EOT;
 				break;
 			
 			case 'textarea':
-				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" rows="5" cols="30">' . html_entity_decode( $value ) . '</textarea>';
+				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" rows="5" cols="30">' .( $value ) . '</textarea>';
 				
 				if ( $desc != '' )
 					echo '<span class="description">' . $desc . '</span>';
@@ -615,11 +615,16 @@ EOT;
 		return false;	
 	}*/
 	public function validate_settings( $inputs ) {
-		foreach($inputs as $key => $input) {
-			$test = $this->check_input($key, $input);
+		//foreach($inputs as $key => $input) {
+		//	$test = $this->check_input($key, $input);
 		//	if(!$test) echo 'input test '. false;
-		}		
-		return $inputs;	
+		//}
+		return array_filter($inputs, array(&$this,'clean_input'));	
+	}
+	
+	public function clean_input($value){
+	 if (get_magic_quotes_gpc()) $value = stripslashes($value);
+		return $value;
 	}
 	
 	public function check_input($key, $input) {
