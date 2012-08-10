@@ -8,7 +8,8 @@ class SigFramework {
 	protected $sections;
 	protected $settings;
 	protected $options;
-	protected $validation;
+	protected $validation_ref = array();
+
 
 	public function __construct($sections) {
 		$this->checkboxes = array();
@@ -82,6 +83,7 @@ class SigFramework {
 		if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] == true )
 			$saved = "<div class='saved'><p><strong>Options saved</strong></p></div>";
 		else $saved = '';	
+			$name = esc_html($this->themeName);
 		
 echo 
 <<<EOT
@@ -94,13 +96,13 @@ EOT;
 			echo get_screen_icon();				
 echo 
 <<<EOT
-			<h2>$this->themeName Theme Options</h2>			
+			<h2>$name Theme Options</h2>			
 					<div id = "tab_wrap">
 						<ul>
 EOT;
-foreach($this->sections as $id => $title) {
-echo 						"<li><a href='#{$id}'>{$title}</a></li>";
-}			
+		foreach($this->sections as $id => $title) {
+echo 		"<li><a href='#".esc_attr($id)."'>".esc_html($title)."</a></li>";
+		}			
 echo 
 <<<EOT
 						</ul>
@@ -125,7 +127,7 @@ EOT;
 	 * @since 1.0
 	 */
 	public function display_section() {
-	//	print_r($this->options);
+		settings_errors('sigf_options');
 	}
 
 
@@ -152,8 +154,9 @@ EOT;
 			$name = $id;			
 			$array_ref = $id;
 		}
+		print_r($array_ref);
 		
-		$exec = "\$value = esc_attr(\$options['".$array_ref."']);";
+		$exec = "\$value = \$options['".$array_ref."'];";
 		eval($exec);
 		
 		if ( empty( $value ) && $type != 'checkbox' )
@@ -163,7 +166,7 @@ EOT;
 		
 		$field_class = '';
 		if ( $class != '' )
-			$field_class = ' ' . $class;
+			$field_class = ' ' . esc_attr($class);
 
 		switch ( $type ) {
 			
@@ -178,68 +181,65 @@ EOT;
 					$id_list=$old_list;
 				}
 				if ( $desc != '' )
-					echo '<span class="description array">' . $desc . '</span>';
+					echo '<span class="description array">' . esc_html($desc) . '</span>';
 				
 				break;		
 				
-			case 'heading':
-				echo '<h4>' . $desc . '</h4>';
-			break;
-			
 			case 'checkbox':
 				
-				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . $id . '" name="sigf_options[' . $name . ']" value="1" ' . checked( $value, 1, false ) . ' /> <label for="' . $id . '">' . $desc . '</label>';		
+				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . esc_attr($id) . '" name="sigf_options[' . esc_attr($name) . ']" value="1" ' . checked( $value, 1, false ) . ' /> <label for="' . esc_attr($id) . '">' . esc_html($desc) . '</label>';		
 				break;
 				
 			case 'select':
 				echo '<select class="select' . $field_class . '" name="sigf_options[' . $name . ']">';
 				
 				foreach ( $choices as $opt_value => $label )
-					echo '<option value="' . esc_attr( $opt_value ) . '"' . selected( $value, $opt_value, false ) . '>' . $label . '</option>';
+					echo '<option value="' . esc_attr( $opt_value ) . '"' . selected( $value, $opt_value, false ) . '>' . esc_html($label) . '</option>';
 				
 				echo '</select>';
 				
 				if ( $desc != '' )
-					echo '<span class="description">' . $desc . '</span>';
+					echo '<span class="description">' . esc_html($desc) . '</span>';
 				
 				break;
 			
 			case 'radio':
 				$i = 0;
 				foreach ( $choices as $opt_value => $label ) {
-					echo '<input class="radio' . $field_class . '" type="radio" name="sigf_options[' . $name . ']" id="' . $id . $i . '" value="' . esc_attr( $opt_value ) . '" ' . checked( $value, $opt_value, false ) . '> <label for="' . $id . $i . '">' . $label . '</label>';
+					echo '<input class="radio' . $field_class . '" type="radio" name="sigf_options[' . $name . ']" id="' . esc_attr($id . $i) . '" value="' . esc_attr( $opt_value ) . '" ' . checked( $value, $opt_value, false ) . '> <label for="' . esc_attr($id . $i) . '">' . esc_html($label) . '</label>';
 					if ( $i < count( $options ) - 1 )
 						echo '<br />';
 					$i++;
 				}
 				
 				if ( $desc != '' )
-					echo '<span class="description">' . $desc . '</span>';
+					echo '<span class="description">' . esc_html($desc) . '</span>';
 				
 				break;
 			
 			case 'textarea':
-				echo '<textarea class="' . $field_class . '" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" rows="5" cols="30">' .( $value ) . '</textarea>';
+				echo '<textarea class="' . $field_class . '" id="' . esc_attr($id) . '" name="sigf_options[' . $name . ']" placeholder="' . esc_attr($std) . '" rows="5" cols="30">' .esc_textarea(html_entity_decode( $value )) . '</textarea>';
 				
 				if ( $desc != '' )
-					echo '<span class="description">' . $desc . '</span>';
+					echo '<span class="description">' . esc_html($desc) . '</span>';
 				
 				break;
 			
 			case 'password':
-				echo '<input class="regular-text' . $field_class . '" type="password" id="' . $id . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $value ) . '" />';
+				echo '<input class="regular-text' . $field_class . '" type="password" id="' . esc_attr($id) . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $value ) . '" />';
 				
 				if ( $desc != '' )
-					echo '<span class="description">' . $desc . '</span>';
+					echo '<span class="description">' . esc_html($desc) . '</span>';
 				
 				break;
 				
-				case 'image':
+			case 'image':
 				if ( $desc != '' )
-					$desc_html = '<span class="description">' . $desc . '</span>';
+					$desc_html = '<span class="description">' . esc_html($desc) . '</span>';
 		 		else $desc_html='';
+		 		$value = esc_url($value);
 		 		if($value)
-		 			$image  = '<img class = "exist-preview" id="logo-p" src="'.$value.'" alt="'.$alt.'" />';
+		 			$image  = '<img class = "exist-preview" id="logo-p" src="'.$value.'" alt="'.esc_attr($alt).'" />';
 				else $image = '';
 				
 		 		echo 
@@ -254,11 +254,11 @@ EOT;
 		 		break;
 		 		 		
 			case 'hidden':
-		 		echo '<input type="hidden" id="' . $id . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $options[$id] ) . '" />';
+		 		echo '<input type="hidden" id="' . esc_attr($id) . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $options[$id] ) . '" />';
 			break;
 			
 			case 'category_filter':
-				echo '<div class = '.$field_class.'>'.$header.'<ul id = "'.$id.'">';
+				echo '<div class = '.$field_class.'>'.$header.'<ul id = "'.esc_attr($id).'">';
 				$desc = $args['desc'];
 				unset($args['desc']);
 				foreach($choices as $choice=>$label) {
@@ -276,9 +276,9 @@ EOT;
 		 	
 			case 'text':
 			default:
-		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . $id . '" name="sigf_options[' . $name . ']" placeholder="' . $std . '" value="' . esc_attr( $value ) . '" />';
+		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . esc_attr($id) . '" name="sigf_options[' . $name . ']" placeholder="' . esc_attr($std) . '" value="' . esc_attr( $value ) . '" />';
 		 		if ( $desc != '' )
-		 			echo '<span class="description">' . $desc . '</span>';
+		 			echo '<span class="description">' . esc_html($desc) . '</span>';
 		 		
 		 		break;
 		 	
@@ -501,7 +501,7 @@ EOT;
 			$rand_posts = get_posts( array( 'numberposts' => 1, 'orderby' => 'rand', 'tag_id' => $tag ) );
 			if(!empty($rand_posts)):
 				foreach( $rand_posts as $post ) : ?>
-				<h2 id = 'headline'>Featured Post | <a href="<?php the_permalink();?>"><?php the_title(); ?></a></h2>
+				<h2 id = 'headline'>Featured Post | <a href="<?php esc_url(the_permalink());?>"><?php esc_html(the_title()); ?></a></h2>
 				<?php endforeach;
 			endif;
 		endif;
@@ -539,7 +539,7 @@ EOT;
 			if($cat_all[$id]->category_count>0 || $show_empty_cat){
 				$list .= '<li>
 							<ul class="latest">
-								<li><h2 class="latest"><a href="'.esc_url(get_category_link( $id )).'">'.get_cat_name($id).'</a></h2></li>';											
+								<li><h2 class="latest"><a href="'.esc_url(get_category_link( $id )).'">'.esc_html(get_cat_name($id)).'</a></h2></li>';											
 				$args = array( 'numberposts' => $cat_settings[$display_opt_key], 'category' =>$id);
 				$i++;
 				$feat_posts = get_posts( $args );
@@ -547,12 +547,12 @@ EOT;
 					setup_postdata( $post );
 					$list .= '<li>
 								<ul class = "latestPost">
-									<li class="list-time">'.get_the_time('d').' '.get_the_time('M').'</li>
-									<li class="list-title"><a href="'.get_permalink(). 'rel="bookmark">'.get_the_title().'</a></li>';
+									<li class="list-time">'.esc_html(get_the_time('d')).' '.esc_html(get_the_time('M')).'</li>
+									<li class="list-title"><a href="'.esc_url(get_permalink()). 'rel="bookmark">'.esc_html(get_the_title()).'</a></li>';
 					if(has_post_thumbnail()&&$show_images) {
-						$list .= '	<li><a href="'.get_permalink().'" title="'.the_title_attribute(array('echo'=>0)).'" >'.get_the_post_thumbnail().'</a></li>';
+						$list .= '	<li><a href="'.esc_url(get_permalink()).'" title="'.esc_attr(the_title_attribute(array('echo'=>0))).'" >'.get_the_post_thumbnail().'</a></li>';
 					}
-					$list .= '		<li class="latest-excerpt">'.get_the_excerpt().'</li>
+					$list .= '		<li class="latest-excerpt">'.esc_html(get_the_excerpt()).'</li>
 								</ul>
 							 </li>';						
 					wp_reset_postdata();
@@ -578,6 +578,7 @@ EOT;
 	public function sigf_shouldihere($input_arr){
 		if($input_arr['never']) return 0;
 		elseif($input_array['all']) return 1;
+		elseif(!is_array($input_arr)) return 1;
 		else {
 			$compare =  array_intersect_assoc($input_arr, $this->sigf_whereami());
 			return  !empty($compare);
@@ -597,96 +598,85 @@ EOT;
 		return $i;
 	}	
 	
-	/**
-	* Validate settings
-	*
-	* @since 1.0
+
 	public function validate_settings( $inputs ) {
-		if ( ! isset( $input['reset_theme'] ) ) {
-			$options = get_option( 'sigf_options' );
-			
-			foreach ( $this->checkboxes as $id ) {
-				if ( isset( $options[$id] ) && ! isset( $input[$id] ) )
-					unset( $options[$id] );
-			}
-			
+		$result = $this->get_inputs($inputs, '');
+		return $inputs;	
+	}
+	
+	public function get_inputs(&$input, $key) {
+		if(!is_array($input)) {	
+			$result = $this->validate_element($input, $key);
+			$input = $result;			
 			return $input;
 		}
-		return false;	
-	}*/
-	public function validate_settings( $inputs ) {
-		//foreach($inputs as $key => $input) {
-		//	$test = $this->check_input($key, $input);
-		//	if(!$test) echo 'input test '. false;
-		//}
-		return array_filter($inputs, array(&$this,'clean_input'));	
+		foreach($input as $id => &$child) {
+				$this->get_inputs($child, $id);
+		}	
 	}
 	
-	public function clean_input($value){
-	 if (get_magic_quotes_gpc()) $value = stripslashes($value);
-		return $value;
-	}
-	
-	public function check_input($key, $input) {
-		if(is_array($input)) {
-			foreach($input as $key => $child) {
-				return $this->check_input($key, $child);
-			}
+	public function validate_element($input, $key) {
+		if(array_key_exists($key,$this->validation_ref)) {
+			$setting = $this->validation_ref[$key]['setting'];
 		}
-	//	else {
-	//		$setting_pointer = find_setting ($key, $this->settings);
-	//	}
-			return $key;
-		// return test_input ($input, $setting_pointer);
-	}
-	
-	public function find_setting($option_id, $settings) {
-	/*	if(in_array($option_id,$this->validation) //.......
 		else {
-			foreach($settings as $id => $setting) {
-				if($option_id == $id) 
-					{
-						$this->validation[]=array($option_id, &$setting);
-						return &$setting;
-					}
-				elseif($setting['type']=='array'||$setting['type']='filter'){
-					foreach($settings['children'] as $child_id => $child) {
-						find_setting($option_id, $child);
-					}
-				else return false;
-				}
-			}
+			$setting = $this->find_setting($key, $this->settings);
+			$this->validation_ref[$key]['setting']=$setting;	
 		}
-	*/	
+
+		$type = $setting['validation']? $setting['validation']: $setting['type'];
+		$this->validation_ref[$key]['type']=$type;
+		$result = $this->validation_check($input, $type, $setting);			
+		if($result === false) {
+			add_settings_error( 'sigf_options', $key.'_err', 'The value for '.$setting['title'].' is not valid', 'error' );
+		}
+		
+		return $result;
 	}
 	
-	public function test_input($input, $setting){
-	//	if(isset($setting['validation']) $check = $setting['validation'];
-	//	else $check = $setting['type'];
-	//	print '<p>checked '.$input
-		
-/*		switch($setting) {
+	
+	public function find_setting($id, $settings) {
+		$return = array();
+		foreach($settings as $key => $setting) {
+			if(strcmp($key,$id)==0) {
+				return $setting;
+			}
+			elseif($setting['type']=='array'||$setting['type']=='category_filter') {
+				$return = array_merge($return, $this->find_setting($id, $setting['children']));
+			}		
+		}
+		return $return;
+	}
+	
+	public function validation_check($value, $type, $setting) {
+		if(is_null($value))	return '';
+
+		if(get_magic_quotes_gpc())	$value = stripslashes($value);
+				
+		switch($type) {
 			case 'integer':
-				if(!preg_match("/^\-?\d+$/", $input)) return false;
-				else return true;
+				return (preg_match("/^\-?\d+$/", $value))? $value: false;
+			case 'js':
+				$value = htmlentities($value);
+				return $value;	
 			case 'html':
-//				if(//check) return false;
-//				else return true;
+				$value = esc_html($value);
+				return $value;	
 			case 'text':
-//				if(//check) return false;
-//				else return true;
+				$value = sanitize_text_field($value);
+				return (ctype_alnum($value))? $value: false;
 			case 'select':
-//				if(not in settings choices values) return false;
-//				else return true;
+				return array_key_exists($value, $setting['choices'])?$value:false;
 			case 'checkbox':
-				return $input == 1 || $input == 0 ? 1 : 0 ;
+				return $value == 1 || $value == 0 ?$value: false ;
+			case 'imgurl':
+				return (preg_match("/^https?:\/\/[\w\d\.]+\.[\w\d\/\-]+\/[\w\d\-]+\.(jp?g|gif|png)$/i", $value))? $value: false;
+			default:
+				return false;
 			break;
 		}
-*/		
-		return true;
-		
 	}
-	
+
 	
 }
 

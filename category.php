@@ -13,7 +13,7 @@
 				<?php the_excerpt(''.__('Read More <span class="meta-nav">&raquo;</span>', 'sandbox').'') ?>
 			</div>
 			<div class="entry-meta">
-				<span class="author vcard"><?php printf(__('By %s', 'sandbox'), '<a class="url fn n" href="'.get_author_link(false, $authordata->ID, $authordata->user_nicename).'" title="' . sprintf(__('View all posts by %s', 'sandbox'), $authordata->display_name) . '">'.get_the_author().'</a>') ?></span>
+				<span class="author vcard"><?php printf(__('By %s', 'sandbox'), '<a class="url fn n" href="'.esc_url(get_author_link(false, $authordata->ID, $authordata->user_nicename)).'" title="' . sprintf(__('View all posts by %s', 'sandbox'), $authordata->display_name) . '">'.get_the_author().'</a>') ?></span>
 				<span class="meta-sep">|</span>
 				<span><?php the_date('d M y'); ?></span>
 				<span class="meta-sep">|</span>

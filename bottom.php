@@ -31,9 +31,9 @@
 <?php if (!function_exists('dynamic_sidebar') || !dynamic_sidebar('Fourth Footer Area') ) : // begin primary sidebar widgets ?>
   	<h2>Subscribe</h2>
 	<ul>
-		<li><a href="<?php bloginfo('rss2_url') ?>" title="<?php echo wp_specialchars(get_bloginfo('name'), 1) ?> <?php _e('Posts RSS feed', 'sandbox'); ?>" rel="alternate" type="application/rss+xml"><?php _e('All posts', 'sandbox') ?></a></li>
-		<li><a href="<?php bloginfo('comments_rss2_url') ?>" title="<?php echo wp_specialchars(bloginfo('name'), 1) ?> <?php _e('Comments RSS feed', 'sandbox'); ?>" rel="alternate" type="application/rss+xml"><?php _e('All comments', 'sandbox') ?></a></li>
+		<li><a href="<?php bloginfo('rss2_url') ?>" title="<?php bloginfo('name') ?> <?php _e('Posts RSS feed', 'sandbox'); ?>" rel="alternate" type="application/rss+xml"><?php _e('All posts', 'sandbox') ?></a></li>
+		<li><a href="<?php bloginfo('comments_rss2_url') ?>" title="<?php bloginfo('name') ?> <?php _e('Comments RSS feed', 'sandbox'); ?>" rel="alternate" type="application/rss+xml"><?php _e('All comments', 'sandbox') ?></a></li>
 	</ul>
-	<a href="<?php bloginfo('rss2_url') ?>" title="<?php echo wp_specialchars(get_bloginfo('name'), 1) ?> <?php _e('Posts RSS feed', 'sandbox'); ?>" rel="alternate" type="application/rss+xml"><img src="<?php bloginfo('template_url'); ?>/images/feedbot.gif" width="125" style="border:none;" alt="<?php echo wp_specialchars(get_bloginfo('name'), 1) ?> <?php _e('Posts RSS feed', 'sandbox'); ?>" /></a>
+	<a href="<?php bloginfo('rss2_url') ?>" title="<?php bloginfo('name') ?> <?php _e('Posts RSS feed', 'sandbox'); ?>" rel="alternate" type="application/rss+xml"><img src="<?php bloginfo('template_url'); ?>/images/feedbot.gif" width="125" style="border:none;" alt="<?php bloginfo('name') ?> <?php _e('Posts RSS feed', 'sandbox'); ?>" /></a>
 <? endif; ?>
 </div>

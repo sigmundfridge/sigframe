@@ -88,7 +88,7 @@ foreach ( $comments as $comment )
 <?php if ( $user_ID ) : ?>
 							<p id="login"><?php printf(__('<span class="loggedin">Logged in as <a href="%1$s" title="Logged in as %2$s">%2$s</a>.</span> <span class="logout"><a href="%3$s" title="Log out of this account">Log out?</a></span>', 'sandbox'),
 								get_option('siteurl') . '/wp-admin/profile.php',
-								wp_specialchars($user_identity, true),
+								esc_html($user_identity),
 								get_option('siteurl') . '/wp-login.php?action=logout&amp;redirect_to=' . get_permalink() ) ?></p>
 
 <?php else : ?>
@@ -96,13 +96,13 @@ foreach ( $comments as $comment )
 							<p id="comment-notes"><?php _e('Your email is <em>never</em> published nor shared.', 'sandbox') ?> <?php if ($req) _e('Required fields are marked <span class="required">*</span>', 'sandbox') ?></p>
 
 							<div class="form-label"><label for="author"><?php _e('Name', 'sandbox') ?></label> <?php if ($req) _e('<span class="required">*</span>', 'sandbox') ?></div>
-							<div class="form-input"><input id="author" name="author" type="text" value="<?php echo $comment_author ?>" size="30" maxlength="20" tabindex="3" /></div>
+							<div class="form-input"><input id="author" name="author" type="text" value="<?php echo esc_attr($comment_author) ?>" size="30" maxlength="20" tabindex="3" /></div>
 
 							<div class="form-label"><label for="email"><?php _e('Email', 'sandbox') ?></label> <?php if ($req) _e('<span class="required">*</span>', 'sandbox') ?></div>
-							<div class="form-input"><input id="email" name="email" type="text" value="<?php echo $comment_author_email ?>" size="30" maxlength="50" tabindex="4" /></div>
+							<div class="form-input"><input id="email" name="email" type="text" value="<?php echo esc_attr($comment_author_email) ?>" size="30" maxlength="50" tabindex="4" /></div>
 
 							<div class="form-label"><label for="url"><?php _e('Website', 'sandbox') ?></label></div>
-							<div class="form-input"><input id="url" name="url" type="text" value="<?php echo $comment_author_url ?>" size="30" maxlength="50" tabindex="5" /></div>
+							<div class="form-input"><input id="url" name="url" type="text" value="<?php echo esc_attr($comment_author_url) ?>" size="30" maxlength="50" tabindex="5" /></div>
 
 <?php endif /* if ( $user_ID ) */ ?>
 
@@ -110,7 +110,7 @@ foreach ( $comments as $comment )
 							<div class="form-textarea"><textarea id="comment" name="comment" cols="45" rows="8" tabindex="6"></textarea></div>
 
 							<div class="form-submit"><input name="submit" type="image" style="width: 74px; height:24px;padding:12px 0;" src="<?php bloginfo('template_url'); ?>/images/speak.png" id="submit" tabindex="5" value="Submit Comment" />
-<input type="hidden" name="comment_post_ID" value="<?php echo $id; ?>" /></div>
+<input type="hidden" name="comment_post_ID" value="<?php echo esc_attr($id); ?>" /></div>
 
 							<?php do_action('comment_form', $post->ID); ?>
 

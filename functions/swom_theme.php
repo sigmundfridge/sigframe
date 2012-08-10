@@ -22,7 +22,7 @@ class SwomTheme extends SigFramework {
 			'section' => 'general',
 			'alt' => __('Preview of site logo'),
 			'button' => __('Upload Logo'),
-			'validation'=> 'text'
+			'validation'=> 'imgurl'
 		);
 		
 		$this->settings['favi'] = array(
@@ -33,7 +33,7 @@ class SwomTheme extends SigFramework {
 			'section' => 'general',
 			'alt' => __('Preview of site favicon'),
 			'button' => __('Upload Favicon'),
-			'validation'=> 'text'
+			'validation'=> 'imgurl'
 		);
 		
 		
@@ -61,7 +61,7 @@ class SwomTheme extends SigFramework {
 			'std'     => '',
 			'type'    => 'textarea',
 			'section' => 'general',
-			'validation' => 'html'
+			'validation' => 'js'
 		);
 		
 		/* Headline Layout
@@ -253,7 +253,7 @@ class SwomTheme extends SigFramework {
 		$this->settings['easing'] = array(
 			'type'    => 'select',
 			'title'   => __( 'Animation' ),
-			'desc'    => __( 'Choose an animation style. For more information see the<a href="http://jqueryui.com/demos/effect/easing.html">jQuery easing demos</a>' ),
+			'desc'    => __( 'Choose an animation style. For more information see the demos at http://jqueryui.com/demos/effect/easing.html' ),
 			'std'     => 'easeInQuad',
 			'section' => 'carousel',
 			'choices' => array_combine(array_values($anim), array_values($anim))

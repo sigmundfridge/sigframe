@@ -8,7 +8,7 @@ class validCheck {
 		$this->options = array ( 'logo' => 'http://sigfrid.co.uk/frame/wp-content/uploads/2012/07/logo-300x61.png', 
 					'favi' => 'http://sigfrid.co.uk/frame/wp-content/uploads/2012/07/favicon1.png',
 					'featured' => 5 ,
-					'head_tracker' =>htmlentities('<script></script>'),
+					'head_tracker' =>'',
 					'cat_order' => array ( 
 						'8' => array ( 'post_no' => 1, 
 										'home_no' => 2 ), 
@@ -74,7 +74,7 @@ class validCheck {
 		if(!is_array($input)) {	
 				print '<p>**************START******</p>';
 				print '<p>**INPUT**</p>';
-				print '<p><b>Element</b> is <i>'.$key.'</i> with a value of '.$input;
+				print '<p><b>Element</b> is <i>'.$key.'</i> with a value of '.htmlentities($input);
 				$result = $this->validate_element($input, $key);
 				print '<p>**OUTPUT**</p>';
 				print '<p>Result is : '.$result.'</p>';
@@ -120,36 +120,46 @@ class validCheck {
 	}
 	
 	public function validation_check($value, $type, $setting) {
-		print '<p>Checking '.$value.' as '.$type.'<p>';//.' result  '.strcmp((string)$key,(string)$id);
-			if(is_null($value)) {				print '<p>null</p>';
-			return '';}
-	
-			switch($type) {
+		print '<p>Checking '.htmlentities($value,ENT_QUOTES).' as '.$type.'<p>';//.' result  '.strcmp((string)$key,(string)$id);
+		if(is_null($value)) 
+			return '';
+
+		if(get_magic_quotes_gpc())
+				$value = stripslashes($value);
+				
+		switch($type) {
 			case 'integer':
-				print '<p>Integer</p>';
 				return (preg_match("/^\-?\d+$/", $value))? $value: false;
-			case 'html':
-				print '<p>HTML</p>';
-				return (preg_match("/^([\d\w]*(&( amp | apos | gt | lt | nbsp | quot | bull | hellip | [lr][ds]quo | [mn]dash | permil          
-							| \#[1-9][0-9]{1,3} | [A-Za-z] [0-9A-Za-z]+ ))[\d\w]*)*$/i",$value))
-							? $value:false;
+			case 'js':
+//				$value = htmlentities($value,ENT_QUOTES);
+				$value = esc_js($value); //wordpress version....
+				print 'html is '.$value;
+				return $value;	
+						/*		return (preg_match("/^
+										([\d\w]*
+											(
+												&( 
+													amp | apos | gt | lt | nbsp | quot | bull | hellip | [lr][ds]quo | [mn]dash | permil          
+													| \#[1-9][0-9]{1,3} | [A-Za-z] [0-9A-Za-z]+ 
+												);
+												[\d\w]*
+											)*
+											[\d\w]*												
+										)*
+										$/i",$value))
+					? $value:false;*/
 			case 'text':
-							print '<p>text</p>';
+				$value = strip_tags($value);
 				return (ctype_alnum($value))? $value: false;
 			case 'select':
-							print '<p>select</p>';
 				return array_key_exists($value, $setting['choices'])?$value:false;
 			case 'checkbox':
-				print '<p>box</p>';
 				return $values == 1 || $value == 0 ?$value: 0 ;
 			case 'imgurl':
-				print '<p>img</p>';
 				return (preg_match("/^https?:\/\/[\w\d\.]+\.[\w\d\/\-]+\/[\w\d\-]+\.(jp?g|gif|png)$/i", $value))? $value: false;
 		//		return (preg_match("/^https?:\/\/([a-z\-]+\.)+[a-z]{2,6}(/[^/#?]+)+\.(jpg|gif|png)$/i", $value))? true: false;
 		//		return (preg_match("/^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?.(?:jp?g|gif|png)$/i", $value))? true: false;
 			default:
-							print '<p>default</p>';
-
 				return false;
 			break;
 		}

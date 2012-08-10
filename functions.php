@@ -407,12 +407,12 @@ function sandbox_widgets_init() {
 	}
 		
 	// Finished intializing Widgets plugin, now let's load the Sandbox default widgets
-	register_sidebar_widget(__('Search', 'sandbox'), 'widget_sandbox_search', null, 'search');
-	unregister_widget_control('search');
-	register_sidebar_widget(__('Meta', 'sandbox'), 'widget_sandbox_meta', null, 'meta');
-	unregister_widget_control('meta');
-	register_sidebar_widget(__('Links', 'sandbox'), 'widget_sandbox_links', null, 'links');
-	unregister_widget_control('links');
+	wp_register_sidebar_widget('search', __('Search', 'sandbox'), 'widget_sandbox_search', null);
+	wp_unregister_widget_control('search');
+	wp_register_sidebar_widget('meta', __('Meta', 'sandbox'), 'widget_sandbox_meta', null);
+	wp_unregister_widget_control('meta');
+	wp_register_sidebar_widget( 'links',__('Links', 'sandbox'), 'widget_sandbox_links', null);
+	wp_unregister_widget_control('links');
 	register_sidebar_widget(array(__('RSS Links', 'sandbox'), 'widgets'), 'widget_sandbox_rsslinks');
 	register_widget_control(array(__('RSS Links', 'sandbox'), 'widgets'), 'widget_sandbox_rsslinks_control', 300, 90);
 }
