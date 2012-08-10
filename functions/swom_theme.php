@@ -183,7 +183,12 @@ class SwomTheme extends SigFramework {
 					'desc'   => __( 'Search' ),
 					'type'    => 'checkbox',
 					'std'	  => '0'
-				),		
+				),				
+				'all'=>array(
+					'desc'   => __( 'All Pages' ),
+					'type'    => 'checkbox',
+					'std'	  => '0'
+				),	
 			)
 		);
 
@@ -298,7 +303,48 @@ class SwomTheme extends SigFramework {
 			'section' => 'carousel',
 			'validation' => 'integer'
 		);	
-
+		
+/*		$this->settings['test'] = array(
+			'title'   => __( 'Test qrrays' ),
+			'desc'    => __( '' ),
+			'type'    => 'array',
+			'section' => 'general',
+			'children'   => array(
+				'a' => array(
+					'desc'   => __( 'Never display (overrides all other boxes)' ),
+					'type'    => 'checkbox',
+					'std'	  => '0',
+					'class'	  => 'deselect'
+				),
+				'b'=>array(
+					'desc'    => __( 'an array' ),
+					'type'    => 'array',
+					'children'   => array(
+						'ba' => array(
+						'desc'   => __( 'baa' ),
+						'type'    => 'checkbox',
+						'std'	  => '0',
+						'class'	  => 'deselect'
+					),		
+					'bb' => array(
+						'desc'   => __( 'bbb' ),
+						'type'    => 'checkbox',
+						'std'	  => '0',
+						'class'	  => 'deselect'
+					),
+				)
+					
+					
+				),					
+				'c'=>array(
+					'desc'   => __( 'Homepage' ),
+					'type'    => 'checkbox',
+					'std'	  => '1'
+				),		
+			)
+		);
+		
+*/
 		/* Reset
 		===========================================*/
 /*		
@@ -370,7 +416,7 @@ class SwomTheme extends SigFramework {
 		if($this->sigf_shouldihere($options[$location_id])) {
 			
 			$show_images = $this->sigf_shouldihere($options[$image_id]);
-			$list = parent::sigf_generate_headline_list($order_id, $max_id, $empty_id, $post_labels, $show_images);
+			$list = parent::sigf_generate_headline_list($order_id, $max_id, $empty_id, $show_images, $post_labels);
 			$category_count = $this->category_count($options[$order_id], $options[$max_id], $options[$empty_id]);
 			$carousel = $category_count>6 ? 'jcarousel-skin-simple carousel' : 'no-carousel';
 			echo 

@@ -131,6 +131,40 @@ EOT;
 	}
 
 
+	public function get_field_value($id,$options) {
+		if(is_array($id) && count($id)===1) $id = $id[0];
+		
+		if(!is_array($id)) {
+			return $options[$id];
+		}
+		else {
+			$id_this = array_shift($id); 
+			return $this->get_field_value($id, $options[$id_this]);
+		}
+	}
+	
+	public function get_field_labels($id) {
+		if(!is_array($id)) {
+			return array('name'=>$id, 'id_label'=>$id);
+		}
+		else {
+			return array('name'=>implode("][",$id),'id_label'=>str_replace ("'", '', implode('__', $id))) ;
+		}
+	}
+/*
+		//	return $id_this.']['.$this->get_field_name($id);
+		//	$array_ref = implode("']['",$id);
+		//	$id = str_replace ("'", '', implode('__', $id));
+if(is_array($id)) {
+			$id_list = $id;
+			$name = ''.implode('][',$id).'';	
+			$array_ref = implode("']['",$id);
+		}
+		elseif(!is_array($id_list)&&$args['type']=='array'){
+			$id_list[]= $args['id'];
+			$array_ref = $id;
+		}
+	
 	/**
 	 * HTML output for text field
 	 *
@@ -139,26 +173,9 @@ EOT;
 	public function display_setting( $args = array() ) {
 		
 		extract( $args );
-		$options = $this->options;	
-		if(is_array($id)) {
-			$id_list = $id;
-			$name = ''.implode('][',$id).'';	
-			$array_ref = implode("']['",$id);
-			$id = str_replace ("'", '', implode('__', $id));
-		}
-		elseif(!is_array($id_list)&&$args['type']=='array'){
-			$id_list[]= $args['id'];
-			$array_ref = $id;
-		}
-		else {
-			$name = $id;			
-			$array_ref = $id;
-		}
-		print_r($array_ref);
-		
-		$exec = "\$value = \$options['".$array_ref."'];";
-		eval($exec);
-		
+		$value = $this->get_field_value($id, $this->options);
+		extract($this->get_field_labels($id));
+				
 		if ( empty( $value ) && $type != 'checkbox' )
 			$value = $std;
 		elseif ( empty( $value ) )
@@ -172,13 +189,11 @@ EOT;
 			
 			case 'array':
 				foreach($children as $key=>$child){
-					$quoted_key = $key;
-					$old_list = $id_list;
-					array_push($id_list,$quoted_key);
-					$child['id']= $id_list;
+					$new_list = (array)$id;
+					$new_list[] = $key;
+					$child['id']= $new_list;
 					$child['value'] = $value;
 					$this->display_setting($child);
-					$id_list=$old_list;
 				}
 				if ( $desc != '' )
 					echo '<span class="description array">' . esc_html($desc) . '</span>';
@@ -187,7 +202,7 @@ EOT;
 				
 			case 'checkbox':
 				
-				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . esc_attr($id) . '" name="sigf_options[' . esc_attr($name) . ']" value="1" ' . checked( $value, 1, false ) . ' /> <label for="' . esc_attr($id) . '">' . esc_html($desc) . '</label>';		
+				echo '<input class="checkbox' . $field_class . '" type="checkbox" id="' . esc_attr($id_label) . '" name="sigf_options[' . esc_attr($name) . ']" value="1" ' . checked( $value, 1, false ) . ' /> <label for="' . esc_attr($id_label) . '">' . esc_html($desc) . '</label>';		
 				break;
 				
 			case 'select':
@@ -206,7 +221,7 @@ EOT;
 			case 'radio':
 				$i = 0;
 				foreach ( $choices as $opt_value => $label ) {
-					echo '<input class="radio' . $field_class . '" type="radio" name="sigf_options[' . $name . ']" id="' . esc_attr($id . $i) . '" value="' . esc_attr( $opt_value ) . '" ' . checked( $value, $opt_value, false ) . '> <label for="' . esc_attr($id . $i) . '">' . esc_html($label) . '</label>';
+					echo '<input class="radio' . $field_class . '" type="radio" name="sigf_options[' . $name . ']" id="' . esc_attr($id_label . $i) . '" value="' . esc_attr( $opt_value ) . '" ' . checked( $value, $opt_value, false ) . '> <label for="' . esc_attr($id_label . $i) . '">' . esc_html($label) . '</label>';
 					if ( $i < count( $options ) - 1 )
 						echo '<br />';
 					$i++;
@@ -218,7 +233,7 @@ EOT;
 				break;
 			
 			case 'textarea':
-				echo '<textarea class="' . $field_class . '" id="' . esc_attr($id) . '" name="sigf_options[' . $name . ']" placeholder="' . esc_attr($std) . '" rows="5" cols="30">' .esc_textarea(html_entity_decode( $value )) . '</textarea>';
+				echo '<textarea class="' . $field_class . '" id="' . esc_attr($id_label) . '" name="sigf_options[' . $name . ']" placeholder="' . esc_attr($std) . '" rows="5" cols="30">' .esc_textarea(html_entity_decode( $value )) . '</textarea>';
 				
 				if ( $desc != '' )
 					echo '<span class="description">' . esc_html($desc) . '</span>';
@@ -226,7 +241,7 @@ EOT;
 				break;
 			
 			case 'password':
-				echo '<input class="regular-text' . $field_class . '" type="password" id="' . esc_attr($id) . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $value ) . '" />';
+				echo '<input class="regular-text' . $field_class . '" type="password" id="' . esc_attr($id_label) . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $value ) . '" />';
 				
 				if ( $desc != '' )
 					echo '<span class="description">' . esc_html($desc) . '</span>';
@@ -244,7 +259,7 @@ EOT;
 				
 		 		echo 
 <<<EOT
-					<input class="regular-text upload_field $field_class" type="text" id=" $id " name="sigf_options[$name]" placeholder=" $std " value="$value" />
+					<input class="regular-text upload_field $field_class" type="text" id=" $id_label " name="sigf_options[$name]" placeholder=" $std " value="$value" />
 					<input class="upload_image_button" type="button" value="$button" />
 					$desc_html
 			 		<div id="logo-preview" class = "img-preview">
@@ -254,11 +269,11 @@ EOT;
 		 		break;
 		 		 		
 			case 'hidden':
-		 		echo '<input type="hidden" id="' . esc_attr($id) . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $options[$id] ) . '" />';
+		 		echo '<input type="hidden" id="' . esc_attr($id_label) . '" name="sigf_options[' . $name . ']" value="' . esc_attr( $options[$id] ) . '" />';
 			break;
 			
 			case 'category_filter':
-				echo '<div class = '.$field_class.'>'.$header.'<ul id = "'.esc_attr($id).'">';
+				echo '<div class = '.$field_class.'>'.$header.'<ul id = "'.esc_attr($id_label).'">';
 				$desc = $args['desc'];
 				unset($args['desc']);
 				foreach($choices as $choice=>$label) {
@@ -276,7 +291,7 @@ EOT;
 		 	
 			case 'text':
 			default:
-		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . esc_attr($id) . '" name="sigf_options[' . $name . ']" placeholder="' . esc_attr($std) . '" value="' . esc_attr( $value ) . '" />';
+		 		echo '<input class="regular-text' . $field_class . '" type="text" id="' . esc_attr($id_label) . '" name="sigf_options[' . $name . ']" placeholder="' . esc_attr($std) . '" value="' . esc_attr( $value ) . '" />';
 		 		if ( $desc != '' )
 		 			echo '<span class="description">' . esc_html($desc) . '</span>';
 		 		
@@ -506,7 +521,7 @@ EOT;
 			endif;
 		endif;
 	}
-	
+
 	public function sigf_generate_headline_list($order_id, $max_id, $empty_id, $show_images, $post_labels){
 		$options = $this->options;
 		global $post;
@@ -577,7 +592,7 @@ EOT;
 		
 	public function sigf_shouldihere($input_arr){
 		if($input_arr['never']) return 0;
-		elseif($input_array['all']) return 1;
+		elseif($input_arr['all']) return 1;
 		elseif(!is_array($input_arr)) return 1;
 		else {
 			$compare =  array_intersect_assoc($input_arr, $this->sigf_whereami());
