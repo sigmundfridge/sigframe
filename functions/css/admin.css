@@ -27,6 +27,9 @@ span.description.array {margin:10px 0 0 25px;}
 span.text_desc{margin: 0px 0px 0 20px;}
 label.upload_desc{}
 label.checkbox_desc{margin:0 5px 0 0; width:auto;}
+.js #tab_wrap {display:none;}
+#sigf_loader{width:128px;background: url('images/loader.gif') no-repeat left 50%;min-height:128px;display:none;margin:0 auto;padding-top:200px;}
+.js #sigf_loader{display:block;}
 
 .options .submit {float: right; position: fixed; top: 150px; right: 50px;}
 .options .submit input[type="submit"] {font-size: 19px !important;padding: 9px;}

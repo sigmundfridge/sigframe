@@ -1,13 +1,17 @@
 (function($) {
+    $('html').addClass('js');
+
 	$(document).ready(function() {
+
 		var result = $('#cat_order').sortable({
 			axis:'y',
 			containment:'document',
 		})
 		.parents('.cat_menu').addClass('cat_input')
-	
-		$("#tab_wrap").tabs();
-	
+
+		$("#sigf_loader").fadeOut().remove();
+		$("#tab_wrap").tabs().fadeIn();
+		
 		$('.saved').animate({opacity: 0}, 3000, function(){$(this).css('display','none')});
 		
 		window.formfield='';

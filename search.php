@@ -2,7 +2,7 @@
 <?php include (TEMPLATEPATH . '/top.php'); ?>
 <div id="container">
 	<div id="left-col">
-		<h2 class="page-title"><?php _e('Search Results:<br/>', 'sandbox') ?> <span id="search-terms"><?php echo wp_specialchars(stripslashes($_GET['s']), true); ?></span></h2>
+		<h2 class="page-title"><?php _e('Search Results:<br/>', 'sandbox') ?> <span id="search-terms"><?php echo esc_html(stripslashes($_GET['s'])); ?></span></h2>
 	</div>
 	<div id="content">
 	<?php if (have_posts()) : ?>

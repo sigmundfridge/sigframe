@@ -9,7 +9,7 @@
 		<div id="post-<?php the_ID(); ?>" class="<?php sandbox_post_class() ?>">
 			<div class="entry-content">
 				<?php the_content() ?>
-				<?php link_pages("\t\t\t\t\t<div class='page-link'>".__('Pages: ', 'sandbox'), "</div>\n", 'number'); ?>
+				<?php wp_link_pages(array('before'           => "\t\t\t\t\t<div class='page-link'>".__('Pages: ', 'sandbox'),'after'            => "</div>\n",'next_or_number'   => 'number'))?>
 				<?php edit_post_link(__('Edit', 'sandbox'),'<span class="edit-link">','</span>') ?>
 			</div>
 		</div><!-- .post -->

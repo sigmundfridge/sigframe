@@ -15,28 +15,28 @@ class SigFramework {
 		$this->checkboxes = array();
 		$this->settings = array();
 		$this->sections = $sections;
-		$this->get_settings();
+		$this->sigf_get_settings();
 		$this->themeName = get_current_theme();
 	
-		add_action( 'admin_menu', array( &$this, 'add_admin_pages' ) );
-		add_action( 'admin_init', array( &$this, 'register_admin_settings' ) );
-		add_action( 'after_setup_theme', array(&$this, 'theme_init'));
+		add_action( 'admin_menu', array( &$this, 'sigf_add_admin_pages' ) );
+		add_action( 'admin_init', array( &$this, 'sigf_register_admin_settings' ) );
+		add_action( 'after_setup_theme', array(&$this, 'sigf_theme_init'));
 		
 		if ( ! get_option( 'sigf_options' ) )
-			$this->initialize_settings();
+			$this->sigf_initialize_settings();
 		else $this->options = get_option( 'sigf_options' );
 		
 	}
 
-	public function add_admin_pages() {
-		$admin_page = add_theme_page( __( 'Theme Options',$shortName), __( 'Theme Options',$shortName ), 'manage_options', 'sigf-options', array( &$this, 'display_page' ) );
+	public function sigf_add_admin_pages() {
+		$admin_page = add_theme_page( __( 'Theme Options',$shortName), __( 'Theme Options',$shortName ), 'manage_options', 'sigf-options', array( &$this, 'sigf_display_page' ) );
 		
-		add_action( 'admin_print_scripts-' . $admin_page, array( &$this, 'admin_scripts' ) );
-		add_action( 'admin_print_styles-' . $admin_page, array( &$this, 'admin_styles' ) );
+		add_action( 'admin_print_scripts-' . $admin_page, array( &$this, 'sigf_admin_scripts' ) );
+		add_action( 'admin_print_styles-' . $admin_page, array( &$this, 'sigf_admin_styles' ) );
 		
 	}
 
-	public function create_setting( $args = array() ) {
+	public function sigf_create_setting( $args = array() ) {
 		
 		$defaults = array(
 			'id'      => 'default_field',
@@ -73,11 +73,11 @@ class SigFramework {
 		if ( $type == 'checkbox' )
 			$this->checkboxes[] = $id;
 		
-		add_settings_field( $id, $title, array( $this, 'display_setting' ), 'sigf-options', $section, $field_args );
+		add_settings_field( $id, $title, array( $this, 'sigf_display_setting' ), 'sigf-options', $section, $field_args );
 	}
 
 
-	public function display_page() {
+	public function sigf_display_page() {
 			
 //	if ( ! isset( $_REQUEST['settings-updated'] ) ) $_REQUEST['settings-updated'] = false;
 		if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] == true )
@@ -96,7 +96,7 @@ EOT;
 			echo get_screen_icon();				
 echo 
 <<<EOT
-			<h2>$name Theme Options</h2>			
+			<h2>$name Theme Options</h2>	
 					<div id = "tab_wrap">
 						<ul>
 EOT;
@@ -126,12 +126,12 @@ EOT;
 	 *
 	 * @since 1.0
 	 */
-	public function display_section() {
+	public function sigf_display_section() {
 		settings_errors('sigf_options');
 	}
 
 
-	public function get_field_value($id,$options) {
+	public function sigf_get_field_value($id,$options) {
 		if(is_array($id) && count($id)===1) $id = $id[0];
 		
 		if(!is_array($id)) {
@@ -139,11 +139,11 @@ EOT;
 		}
 		else {
 			$id_this = array_shift($id); 
-			return $this->get_field_value($id, $options[$id_this]);
+			return $this->sigf_get_field_value($id, $options[$id_this]);
 		}
 	}
 	
-	public function get_field_labels($id) {
+	public function sigf_get_field_labels($id) {
 		if(!is_array($id)) {
 			return array('name'=>$id, 'id_label'=>$id);
 		}
@@ -151,30 +151,18 @@ EOT;
 			return array('name'=>implode("][",$id),'id_label'=>str_replace ("'", '', implode('__', $id))) ;
 		}
 	}
-/*
-		//	return $id_this.']['.$this->get_field_name($id);
-		//	$array_ref = implode("']['",$id);
-		//	$id = str_replace ("'", '', implode('__', $id));
-if(is_array($id)) {
-			$id_list = $id;
-			$name = ''.implode('][',$id).'';	
-			$array_ref = implode("']['",$id);
-		}
-		elseif(!is_array($id_list)&&$args['type']=='array'){
-			$id_list[]= $args['id'];
-			$array_ref = $id;
-		}
+
 	
 	/**
 	 * HTML output for text field
 	 *
 	 * @since 1.0
 	 */
-	public function display_setting( $args = array() ) {
+	public function sigf_display_setting( $args = array() ) {
 		
 		extract( $args );
-		$value = $this->get_field_value($id, $this->options);
-		extract($this->get_field_labels($id));
+		$value = $this->sigf_get_field_value($id, $this->options);
+		extract($this->sigf_get_field_labels($id));
 				
 		if ( empty( $value ) && $type != 'checkbox' )
 			$value = $std;
@@ -193,7 +181,7 @@ if(is_array($id)) {
 					$new_list[] = $key;
 					$child['id']= $new_list;
 					$child['value'] = $value;
-					$this->display_setting($child);
+					$this->sigf_display_setting($child);
 				}
 				if ( $desc != '' )
 					echo '<span class="description array">' . esc_html($desc) . '</span>';
@@ -281,7 +269,7 @@ EOT;
 					$args ['type'] = 'array';
 					$old_args=$args['id'];
 					$args ['id'] = array($args['id'], $choice);
-					$this->display_setting($args);
+					$this->sigf_display_setting($args);
 					echo '</li>';
 					$args['id']=$old_args;
 				};	
@@ -306,7 +294,7 @@ EOT;
 	 * 
 	 * @since 1.0
 	 */
-	public function get_settings() {
+	public function sigf_get_settings() {
 		
 /*		$this->settings['example_heading'] = array(
 			'section' => 'general',
@@ -372,7 +360,7 @@ EOT;
 	 * 
 	 * @since 1.0
 	 */
-	public function initialize_settings() {
+	public function sigf_initialize_settings() {
 		
 		$default_settings = array();
 		foreach ( $this->settings as $id => $setting ) {
@@ -401,24 +389,24 @@ EOT;
 	*
 	* @since 1.0
 	*/
-	public function register_admin_settings() {
+	public function sigf_register_admin_settings() {
 		
-		register_setting( 'sigf_options', 'sigf_options', array ( &$this, 'validate_settings' ) );
+		register_setting( 'sigf_options', 'sigf_options', array ( &$this, 'sigf_validate_settings' ) );
 		
-		$this->register_sections();
+		$this->sigf_register_sections();
 		
-		$this->get_settings();
+		$this->sigf_get_settings();
 		
 		foreach ( $this->settings as $id => $setting ) {
 			$setting['id'] = $id;
 			$setting['value']=$this->options[$id];
-			$this->create_setting( $setting );
+			$this->sigf_create_setting( $setting );
 			}
 	}
 	
-	public function register_sections(){
+	public function sigf_register_sections(){
 		foreach ( $this->sections as $slug => $title ) {
-			add_settings_section( $slug, $title, array( &$this, 'display_section' ), 'sigf-options' );
+			add_settings_section( $slug, $title, array( &$this, 'sigf_display_section' ), 'sigf-options' );
 		}
 	}
 	
@@ -427,7 +415,7 @@ EOT;
 	*
 	* @since 1.0
 	*/
-	public function admin_scripts() {
+	public function sigf_admin_scripts() {
 	 	wp_enqueue_script('jquery-ui-sortable');
   		wp_enqueue_script('jquery-ui-tabs');
  		wp_enqueue_script('media-upload');
@@ -439,25 +427,25 @@ EOT;
 	*
 	* @since 1.0
 	*/
-	public function admin_styles() {
+	public function sigf_admin_styles() {
 		
 		wp_enqueue_style("theme_style", get_stylesheet_directory_uri()."/functions/css/admin.css", false, "1.0", "all");
 		wp_enqueue_style('thickbox');
 	
 	}	
 	
-	public function theme_init() {
-		add_action('wp_print_scripts', array(&$this, 'do_theme_script')); // For use on the Front end (ie. Theme)
-		add_action('wp_print_styles', array(&$this, 'do_theme_style')); // For use on the Front end (ie. Theme)		
+	public function sigf_theme_init() {
+		add_action('wp_print_scripts', array(&$this, 'sigf_do_theme_script')); // For use on the Front end (ie. Theme)
+		add_action('wp_print_styles', array(&$this, 'sigf_do_theme_style')); // For use on the Front end (ie. Theme)		
 	}
 	
-	public function do_theme_script() {
+	public function sigf_do_theme_script() {
 	}
 
-	public function do_theme_style() {
+	public function sigf_do_theme_style() {
 	}
 	
-	public function register_thumbs($height) {
+	public function sigf_register_thumbs($height) {
 		if ( function_exists( 'add_theme_support' ) ) { 
 			add_theme_support( 'post-thumbnails' );
 			if (!isset($height)) $height = 170;
@@ -600,7 +588,7 @@ EOT;
 		}
 	}
 	
-	public function category_count($cat_list, $max_cat, $show_empty=0) {
+	public function sigf_category_count($cat_list, $max_cat, $show_empty=0) {
 		$all_cats = get_categories(array('hide_empty'=>0));		
 		$all_cat_by_id = array();
 		foreach($all_cats as $cat) $all_cat_by_id[$cat->term_id]=$cat;	
@@ -614,34 +602,34 @@ EOT;
 	}	
 	
 
-	public function validate_settings( $inputs ) {
-		$result = $this->get_inputs($inputs, '');
+	public function sigf_validate_settings( $inputs ) {
+		$result = $this->sigf_get_inputs($inputs, '');
 		return $inputs;	
 	}
 	
-	public function get_inputs(&$input, $key) {
+	public function sigf_get_inputs(&$input, $key) {
 		if(!is_array($input)) {	
-			$result = $this->validate_element($input, $key);
+			$result = $this->sigf_validate_element($input, $key);
 			$input = $result;			
 			return $input;
 		}
 		foreach($input as $id => &$child) {
-				$this->get_inputs($child, $id);
+				$this->sigf_get_inputs($child, $id);
 		}	
 	}
 	
-	public function validate_element($input, $key) {
+	public function sigf_validate_element($input, $key) {
 		if(array_key_exists($key,$this->validation_ref)) {
 			$setting = $this->validation_ref[$key]['setting'];
 		}
 		else {
-			$setting = $this->find_setting($key, $this->settings);
+			$setting = $this->sigf_find_setting($key, $this->settings);
 			$this->validation_ref[$key]['setting']=$setting;	
 		}
 
 		$type = $setting['validation']? $setting['validation']: $setting['type'];
 		$this->validation_ref[$key]['type']=$type;
-		$result = $this->validation_check($input, $type, $setting);			
+		$result = $this->sigf_validation_check($input, $type, $setting);			
 		if($result === false) {
 			add_settings_error( 'sigf_options', $key.'_err', 'The value for '.$setting['title'].' is not valid', 'error' );
 		}
@@ -650,20 +638,20 @@ EOT;
 	}
 	
 	
-	public function find_setting($id, $settings) {
+	public function sigf_find_setting($id, $settings) {
 		$return = array();
 		foreach($settings as $key => $setting) {
 			if(strcmp($key,$id)==0) {
 				return $setting;
 			}
 			elseif($setting['type']=='array'||$setting['type']=='category_filter') {
-				$return = array_merge($return, $this->find_setting($id, $setting['children']));
+				$return = array_merge($return, $this->sigf_find_setting($id, $setting['children']));
 			}		
 		}
 		return $return;
 	}
 	
-	public function validation_check($value, $type, $setting) {
+	public function sigf_validation_check($value, $type, $setting) {
 		if(is_null($value))	return '';
 
 		if(get_magic_quotes_gpc())	$value = stripslashes($value);

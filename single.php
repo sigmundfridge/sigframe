@@ -8,7 +8,7 @@
 		<h2 class="entry-title"><?php the_title(); ?></h2>
 		<div class="excerpt"><?php the_excerpt(); ?></div>
 		<p class="author">By <?php the_author_posts_link(); ?></p>
-		<div class="author-desc"><p><?php the_author_description(); ?></p></div>
+		<div class="author-desc"><p><?php the_author_meta('description'); ?></p></div>
 		<div id="nav-above" class="navigation">					
 			<h3>Browse in <?php 
 			foreach((get_the_category()) as $cat) { 
@@ -23,7 +23,7 @@
 		<div id="post-<?php the_ID(); ?>" class="<?php sandbox_post_class(); ?>">
 			<div class="entry-content">
 				<?php the_content(''.__('Read More <span class="meta-nav">&raquo;</span>', 'sandbox').''); ?>
-				<?php link_pages("\t\t\t\t\t<div class='page-link'>".__('Pages: ', 'sandbox'), "</div>\n", 'number'); ?>
+				<?php 	wp_link_pages(array('before'=>"\t\t\t\t\t<div class='page-link'>".__('Pages: ', 'sandbox'),	'after' => '</div>\n','next_or_number'   => 'number',)); ?>
 			<?php if (function_exists('the_tags') ) : ?>
 				<div class = 'tags'><?php the_tags(); ?></div>
 			<?php endif; ?>

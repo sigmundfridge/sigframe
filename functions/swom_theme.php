@@ -9,7 +9,7 @@ class SwomTheme extends SigFramework {
 	}
 
 
-	public function get_settings() {
+	public function sigf_get_settings() {
 		
 		/* General Settings
 		===========================================*/
@@ -359,12 +359,12 @@ class SwomTheme extends SigFramework {
 */		
 	}
 	
-	public function register_sections() {
+	public function sigf_register_sections() {
 		foreach ( $this->sections as $slug => $title ) {
 			if ( $slug == 'carousel' )
-				add_settings_section( $slug, $title, array( &$this, 'display_carousel_section' ), 'sigf-options' );
+				add_settings_section( $slug, $title, array( &$this, 'sigf_display_carousel_section' ), 'sigf-options' );
 			else
-				add_settings_section( $slug, $title, array( &$this, 'display_section' ), 'sigf-options' );
+				add_settings_section( $slug, $title, array( &$this, 'sigf_display_section' ), 'sigf-options' );
 		}
 	}
 	
@@ -372,31 +372,31 @@ class SwomTheme extends SigFramework {
 	 * Description for Carousel section
 	 *
 	 */
-	public function display_carousel_section() {
+	public function sigf_display_carousel_section() {
 	echo '<p>
 			The headline category display uses jCarousel. For more information see the <a href="http://sorgalla.com/projects/jcarousel/">jCarousel homepage</a>
 		  </p>'	;				
 	}
 	
-	public function admin_scripts() {
+	public function sigf_admin_scripts() {
 		wp_enqueue_script('admin-scripts', get_stylesheet_directory_uri()."/functions/js/theme-admin-js.js");
-		$this->register_thumbs($this->options['max_feat_h']);
-		parent::admin_scripts();
+		$this->sigf_register_thumbs($this->options['max_feat_h']);
+		parent::sigf_admin_scripts();
 	}
 	
-	public function theme_init() {
-		$this->register_thumbs($this->options['max_feat_h']);
-		parent::theme_init();
+	public function sigf_theme_init() {
+		$this->sigf_register_thumbs($this->options['max_feat_h']);
+		parent::sigf_theme_init();
 	}
 
-	public function do_theme_script() {
+	public function sigf_do_theme_script() {
 		
 		$options=$this->options;
 		
 		wp_register_script("jcarousel-js", get_stylesheet_directory_uri()."/scripts/jquery.jcarousel.min.js",array("jquery"));
 		wp_register_script("carousel-start", get_stylesheet_directory_uri()."/scripts/carousel-main.js",array("jcarousel-js"));
 		wp_register_script("jquery-ui", "https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js", array	("jcarousel-js"));
-		$carousel_count = $this->category_count($options['cat_order'], $options['max_cat'], $options['empty_cat']);
+		$carousel_count = $this->sigf_category_count($options['cat_order'], $options['max_cat'], $options['empty_cat']);
 		if($carousel_count>6) {
 			wp_enqueue_script('jquery');
 			wp_enqueue_script("jcarousel-js");
@@ -407,7 +407,7 @@ class SwomTheme extends SigFramework {
 		wp_localize_script( 'carousel-start', 'carouselParam', $params);
 	}
 	
-	public function do_theme_style() {
+	public function sigf_do_theme_style() {
 		wp_enqueue_style('jcarousel-css', get_stylesheet_directory_uri()."/css/jcarousel-simple/skin.css");
 	}
 	
@@ -417,7 +417,7 @@ class SwomTheme extends SigFramework {
 			
 			$show_images = $this->sigf_shouldihere($options[$image_id]);
 			$list = parent::sigf_generate_headline_list($order_id, $max_id, $empty_id, $show_images, $post_labels);
-			$category_count = $this->category_count($options[$order_id], $options[$max_id], $options[$empty_id]);
+			$category_count = $this->sigf_category_count($options[$order_id], $options[$max_id], $options[$empty_id]);
 			$carousel = $category_count>6 ? 'jcarousel-skin-simple carousel' : 'no-carousel';
 			echo 
 <<<EOT
